@@ -1,26 +1,30 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-inter);
+  --color-blue-50: #feece8;
+  --color-blue-100: #fdd5c9;
+  --color-blue-200: #fbab93;
+  --color-blue-300: #f87b5a;
+  --color-blue-400: #f55a30;
+  --color-blue-500: #f35423; /* Comsci Primary Logo Orange */
+  --color-blue-600: #e54212;
+  --color-blue-700: #c0320a;
+  --color-blue-800: #992a0e;
+  --color-blue-900: #7d2610;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Removed dark mode to force light mode only */
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

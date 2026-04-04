@@ -1,0 +1,355 @@
+import React from 'react';
+import { Document, Page, Text, View, StyleSheet, Image, Link, Font } from '@react-pdf/renderer';
+
+if (typeof window !== 'undefined') {
+  Font.register({
+    family: 'Homemade Apple',
+    src: `${window.location.origin}/fonts/HomemadeApple-Regular.ttf`
+  });
+} else {
+  Font.register({
+    family: 'Homemade Apple',
+    src: '/fonts/HomemadeApple-Regular.ttf'
+  });
+}
+import { ProposalState, getCurrencySymbol } from '@/hooks/useProposalState';
+import { SERVICES_DATA } from '@/data/services';
+
+const formatProposalDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+
+  const day = date.getDate();
+  const getOrdinalNum = (n: number) => {
+    return n + (n > 0 ? ['th', 'st', 'nd', 'rd'][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10] : '');
+  };
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  return `${getOrdinalNum(day)} ${monthNames[date.getMonth()]}, ${date.getFullYear()}`;
+};
+
+const cleanText = (str: string | undefined | null) => {
+  if (!str) return '';
+  // Replace smart quotes and dashes to prevent Fontkit crashes
+  let cleaned = str
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/[\u2026]/g, '...');
+
+  // Strip standard emojis, pictograms, zero-width-joiners, and variation selectors (Helvetica safe)
+  cleaned = cleaned.replace(/[\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE0F}\u{200D}]/gu, '');
+
+  return cleaned;
+};
+
+const renderCustomText = (text: string, styles: any) => {
+  if (!text) return null;
+  const lines = text.split('\n');
+  return lines.map((line, idx) => {
+    const trimmed = line.trim();
+    if (!trimmed) return <View key={idx} style={{ height: 10 }} />;
+
+    if (trimmed.startsWith('# ')) {
+      return <Text key={idx} style={[styles.subHeader, { marginTop: idx === 0 ? 0 : 15 }]}>{trimmed.substring(2)}</Text>;
+    }
+    if (trimmed.startsWith('## ')) {
+      return <Text key={idx} style={[styles.subHeader, { fontSize: 14, marginTop: idx === 0 ? 0 : 10 }]}>{trimmed.substring(3)}</Text>;
+    }
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      return (
+        <View key={idx} style={styles.listItem}>
+          <Text style={styles.bullet}>•</Text>
+          <View style={styles.listItemContent}>
+            <Text style={styles.text}>{trimmed.substring(2)}</Text>
+          </View>
+        </View>
+      );
+    }
+    return <Text key={idx} style={styles.text}>{trimmed}</Text>;
+  });
+};
+
+const styles = StyleSheet.create({
+  page: {
+    backgroundColor: '#ffffff',
+    padding: 40,
+    fontFamily: 'Helvetica',
+    color: '#333333',
+  },
+  coverPage: {
+    backgroundColor: '#ffffff',
+    color: '#000000',
+    padding: 40,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    height: '100%',
+    position: 'relative'
+  },
+  coverTopPattern: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 300,
+    width: '100%',
+    objectFit: 'cover',
+  },
+  titlePrimary: { fontSize: 42, fontWeight: 'bold', marginBottom: 10, color: '#F35423' },
+  titleSecondary: { fontSize: 28, fontWeight: 'bold', marginBottom: 40, color: '#000000' },
+  coverDetail: { fontSize: 12, color: '#000000', marginBottom: 4 },
+  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#111827', borderBottomWidth: 2, borderBottomColor: '#F35423', paddingBottom: 10 },
+  section: { marginBottom: 20 },
+  subHeader: { fontSize: 16, fontWeight: 'bold', color: '#111827', marginBottom: 10, marginTop: 10 },
+  text: { fontSize: 12, lineHeight: 1.5, color: '#4B5563', marginBottom: 8 },
+  listItem: { flexDirection: 'row', marginBottom: 6 },
+  bullet: { width: 15, fontSize: 12, color: '#F35423' },
+  listItemContent: { flex: 1 },
+  listItemTitle: { fontSize: 12, fontWeight: 'bold', color: '#1F2937' },
+  listItemDesc: { fontSize: 11, color: '#6B7280', marginTop: 2 },
+  table: { display: 'flex', flexDirection: 'column', width: 'auto', marginTop: 10, borderWidth: 1, borderColor: '#E5E7EB' },
+  tableRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
+  tableHeader: { backgroundColor: '#F3FAF7' }, // Light tint for table headers
+  tableColHalf: { width: '50%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' },
+  tableColThird: { width: '33.33%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' },
+  tableCellHeader: { fontSize: 10, fontWeight: 'bold', color: '#111827' },
+  tableCell: { fontSize: 10, color: '#4B5563' },
+  link: { fontSize: 10, color: '#F35423', textDecoration: 'none' },
+  footerText: { position: 'absolute', bottom: 30, left: 40, right: 40, fontSize: 10, color: '#9CA3AF', textAlign: 'center', borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 10 },
+  signatureBox: { marginTop: 40, borderTopWidth: 1, borderTopColor: '#000000', width: 250, paddingTop: 10 },
+  logo: { width: 140, marginBottom: 30 },
+  projectDetailsBox: { backgroundColor: '#F9FAFB', padding: 15, marginTop: 10, marginBottom: 20, borderLeftWidth: 3, borderLeftColor: '#F35423' }
+});
+
+export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState, origin?: string }) => {
+  const groupedScope: Record<string, typeof state.selectedScope> = {};
+  state.selectedScope.forEach(item => {
+    if (!groupedScope[item.categoryId]) groupedScope[item.categoryId] = [];
+    groupedScope[item.categoryId].push(item);
+  });
+
+  const totalBudget = parseFloat(state.totalPrice) || 0;
+  // Use safe string codes (USD, INR) for the PDF instead of symbols (₹) to prevent Helvetica font crashes
+  const currencySymbol = getCurrencySymbol(state.currency || 'USD', true);
+
+  return (
+    <Document>
+      {/* Page 1: Cover Page */}
+      <Page size="A4" style={styles.coverPage}>
+        {/* Background Image placed at the very bottom */}
+        <Image src={origin ? `${origin}/cover-pattern.png` : "/cover-pattern.png"} style={styles.coverTopPattern} />
+
+        <View style={{ zIndex: 10 }}>
+          <Text style={styles.titlePrimary}>Project Proposal</Text>
+          <Text style={styles.titleSecondary}>{cleanText(state.clientName || '')}</Text>
+        </View>
+
+        <View style={{ zIndex: 10, paddingBottom: 300 }}>
+          {/* Static Comsci Logo from Next.js public directory */}
+          <Image src={origin ? `${origin}/comsci-logo.png` : "/comsci-logo.png"} style={{ width: 140, marginBottom: 15 }} />
+
+          <Text style={[styles.coverDetail, { fontWeight: 'bold', marginBottom: 8 }]}>Prepared by</Text>
+          <Text style={[styles.coverDetail, { color: '#F35423', fontWeight: 'bold', fontSize: 16 }]}>Arya Kagathara</Text>
+          <Text style={styles.coverDetail}>CEO & Founder</Text>
+          <Text style={styles.coverDetail}>hello@comsci.tech | www.comsci.tech</Text>
+
+          <Text style={[styles.coverDetail, { marginTop: 15 }]}>{formatProposalDate(state.projectDate || new Date().toISOString().split('T')[0])}</Text>
+          <Text style={[styles.coverDetail, { fontSize: 9, color: '#6B7280', marginTop: 4 }]}>This proposal is valid for 14 days only.</Text>
+        </View>
+      </Page>
+
+      {/* Page 2: Introduction & Project Details */}
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.header}>About Comsci</Text>
+        <View style={styles.section}>
+          <Text style={styles.text}>
+            We are a dedicated Design and Development agency with a passion for creating impactful digital experiences.
+            Our core focus is to deliver a modern, intuitive, and visually appealing outcomes that align with your brand identity and enhance user engagement.
+          </Text>
+          <Text style={styles.text}>
+            Our process is built on collaboration, transparency, and a relentless pursuit of excellence. We don't just build websites or design logos; we craft comprehensive digital ecosystems that drive growth and establish a strong market presence.
+          </Text>
+        </View>
+        <Text style={styles.subHeader}>Our Mission</Text>
+        <View style={styles.section}>
+          <Text style={styles.text}>
+            At Comsci, our mission is to empower businesses through innovative technology and exceptional design. We strive to create digital solutions that not only look beautiful but also deliver measurable results. Our vision is to be the leading partner for digital transformation, helping our clients navigate the digital landscape with confidence and success.
+          </Text>
+        </View>
+
+        <Image src={origin ? `${origin}/services-graphic.png` : "/services-graphic.png"} style={{ marginTop: 20, width: '100%', objectFit: 'contain' }} />
+
+        <Text style={styles.footerText}>Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech</Text>
+      </Page>
+
+      {state.projectDetails && (
+        <Page size="A4" style={styles.page}>
+          <View>
+            <Text style={styles.header}>Project Understanding & Requirements</Text>
+            <View style={styles.projectDetailsBox} wrap={true}>
+              {cleanText(state.projectDetails).split('\n').map((para, i) => (
+                <Text key={i} style={styles.text}>{para}</Text>
+              ))}
+            </View>
+          </View>
+          <Text style={styles.footerText}>Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech</Text>
+        </Page>
+      )}
+
+      {/* Page 3: Scope of Work & Timelines */}
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.header}>Project Scope & Timelines</Text>
+        <View style={styles.section}>
+          <Text style={styles.text}>
+            The following outlines the specific deliverables, services, and timelines included in this project.
+          </Text>
+        </View>
+
+        {Object.keys(groupedScope).length === 0 && !state.customScopeContent ? (
+          <Text style={styles.text}>No scope items selected.</Text>
+        ) : (
+          Object.keys(groupedScope).map((categoryId) => {
+            const categoryTitle = SERVICES_DATA.find(c => c.id === categoryId)?.title || categoryId;
+            const timeline = state.categoryTimelines[categoryId];
+            const titleWithTimeline = timeline ? `${categoryTitle} - ${timeline}` : categoryTitle;
+            const items = groupedScope[categoryId];
+
+            return (
+              <View key={categoryId} style={{ marginBottom: 15 }}>
+                <Text style={styles.subHeader}>{cleanText(titleWithTimeline)}</Text>
+                {items.map((item, idx) => (
+                  <View key={idx} style={styles.listItem}>
+                    <Text style={styles.bullet}>•</Text>
+                    <View style={styles.listItemContent}>
+                      <Text style={styles.listItemTitle}>{cleanText(item.label)}</Text>
+                      <Text style={styles.listItemDesc}>{cleanText(item.description)}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            );
+          })
+        )}
+
+        {state.customScopeContent && (
+          <View style={[styles.projectDetailsBox, { marginTop: 20 }]} wrap={true}>
+            {renderCustomText(cleanText(state.customScopeContent), styles)}
+          </View>
+        )}
+        <Text style={styles.footerText}>Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech</Text>
+      </Page>
+
+      {/* Page 4: Project Budget & Milestones, Portfolio */}
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.header}>Financial Investment</Text>
+
+        <View style={styles.section}>
+          <Text style={styles.subHeader}>Total Project Cost: {currencySymbol}{state.totalPrice || '0.00'}</Text>
+        </View>
+
+        <Text style={[styles.subHeader]}>Payment Milestones</Text>
+        <View style={[styles.table, { marginTop: 5 }]}>
+          <View style={[styles.tableRow, styles.tableHeader]}>
+            <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Phase</Text></View>
+            <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Percentage</Text></View>
+            <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Amount ({getCurrencySymbol(state.currency || 'USD', true).trim()})</Text></View>
+          </View>
+          {state.paymentMilestones.map((ms) => {
+            const perc = parseFloat(ms.percentage) || 0;
+            const calcAmount = totalBudget * (perc / 100);
+            return (
+              <View key={ms.id} style={styles.tableRow} wrap={false}>
+                <View style={styles.tableColThird}><Text style={styles.tableCell}>{cleanText(ms.name)}</Text></View>
+                <View style={styles.tableColThird}><Text style={styles.tableCell}>{ms.percentage}%</Text></View>
+                <View style={styles.tableColThird}><Text style={styles.tableCell}>{currencySymbol}{calcAmount.toFixed(2)}</Text></View>
+              </View>
+            )
+          })}
+        </View>
+
+        <Text style={[styles.subHeader]}>Payment Mode</Text>
+        <View style={styles.section}>
+          <Text style={styles.text}>1. Bank to Bank</Text>
+          <Text style={styles.text}>2. Payoneer, Wise or other Payment Gateways....</Text>
+          <Text style={styles.text}>Note: Whichever is the best for the client and us to get the money fast at lower exchange rates.</Text>
+          <Text style={styles.text}>3. Cash if nearby location</Text>
+        </View>
+
+        {state.portfolioLinks.length > 0 && (
+          <View style={[styles.section, { marginTop: 20 }]}>
+            <Text style={styles.header}>Portfolio References</Text>
+            <View style={styles.table}>
+              <View style={[styles.tableRow, styles.tableHeader]}>
+                <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Project Name</Text></View>
+                <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Reference Link</Text></View>
+              </View>
+              {state.portfolioLinks.map((link, idx) => {
+                const url = link.url ? link.url.trim() : '';
+                const validUrl = (!url || url.startsWith('http')) ? url : `https://${url}`;
+                return (
+                  <View key={idx} style={styles.tableRow} wrap={false}>
+                    <View style={styles.tableColHalf}><Text style={styles.tableCell}>{cleanText(link.name)}</Text></View>
+                    <View style={styles.tableColHalf}>
+                      {validUrl ? (
+                        <Link src={validUrl} style={styles.link}>{cleanText(url)}</Link>
+                      ) : (
+                        <Text style={styles.tableCell}>{cleanText(url) || "-"}</Text>
+                      )}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        )}
+        <Text style={styles.footerText}>Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech</Text>
+      </Page>
+
+      {/* Page 5: Terms & Approval */}
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.header}>Additional Features & Future Scope</Text>
+        <View style={styles.section}>
+          <Text style={styles.text}>
+            Any additional features, complex functionalities, or requirements not mentioned/included in the current project scope will be treated as part of a future phase or as a project extension.
+          </Text>
+          <Text style={styles.text}>
+            Such updates will be planned, estimated, and executed separately after the completion and delivery of the initially agreed scope. This ensures that the core project remains on schedule and within the defined timeline and budget.
+          </Text>
+          <Text style={styles.text}>
+            We are dedicated to delivering our best work and supporting you throughout the project. We are happy to accommodate reasonable adjustments and suggestions along the way with a limit while ensuring that the project stays on track and within the agreed scope. This balance allows us to maintain quality, meet deadlines, and achieve the best results for you.
+          </Text>
+        </View>
+
+        <Text style={styles.header}>Project Notes & Terms</Text>
+        <View style={styles.section}>
+          <Text style={[styles.text, { fontSize: '10px' }]}>
+            <Text style={{ fontWeight: 'bold' }}>Quality Assurance & Bug Fixes:</Text> All deliverables will go through a detailed testing and review process before launch. Any issues or bugs will be resolved at no additional cost.
+          </Text>
+          <Text style={[styles.text, { fontSize: '10px' }]}>
+            <Text style={{ fontWeight: 'bold' }}>Content, Iconography & Visual Assets:</Text> If the client agrees to use royalty-free assets/design assets, the design team will assist in selecting content that best matches the brand’s tone and aesthetics. If the client prefers to use premium or paid icon/images/3D/Illustration/any else sets from third-party marketplaces, they may purchase and provide it.
+          </Text>
+          <Text style={[styles.text, { fontSize: '10px' }]}>
+            <Text style={{ fontWeight: 'bold' }}>Third-Party Services & Costs:</Text> Any recurring expenses such as in website/app for server hosting, domain renewals, premium plugins, or third-party API services will be by the client. The development team will assist in setup and configuration to help the save the client’s money.
+          </Text>
+          <Text style={[styles.text, { fontSize: '10px' }]}>
+            <Text style={{ fontWeight: 'bold' }}>Post-Launch Support & Future Collaboration:</Text> The agency will continue to support and maintain the project post-deployment. The team is open to assisting with future updates, feature expansions, or design refreshes as part of a long-term collaboration.
+          </Text>
+        </View>
+
+        <Text style={[styles.header, { borderBottomWidth: 0, paddingBottom: 0, fontSize: 16 }]}>Authority Signature</Text>
+        <View style={styles.section}>
+          <Text style={{ fontFamily: 'Homemade Apple', fontSize: 20, color: '#000000' }}>Arya Kagathara</Text>
+          <View>
+            <Text style={[styles.text, { fontWeight: 'bold', color: '#000000' }]}>Unique Encrypted Digital Signature</Text>
+            <Text style={{ fontSize: 8, color: '#000000' }}>
+              {("SIGNED-0f434ae6eb545f612a672c945cf217c6eaebe00c1aa5e3ecf2e969df14f10429db953d0f8c2ab8d5b384edd2b71dc15f61fea0feb4d247184e86b752506fc6317c89d7b503ae1dc822d4ef2f1230df0e7c7effae26945ac88ff69d4cc9a3d05ac88ed54a6cc22647e0ea769c6d8574bcde745bf6c0afe6a006967d31f592ecf6daaeec7b45270f0a4489799924db015d46ab8682113f190b5ab307d099b2".match(/.{1,60}/g) || []).join('\n')}
+            </Text>
+          </View>
+        </View>
+        <Text style={styles.footerText}>Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech</Text>
+      </Page>
+    </Document >
+  );
+};
