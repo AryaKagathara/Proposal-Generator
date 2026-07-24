@@ -134,6 +134,10 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
   // Use safe string codes (USD, INR) for the PDF instead of symbols (₹) to prevent Helvetica font crashes
   const currencySymbol = getCurrencySymbol(state.currency || 'USD', true);
 
+  const footerText = state.hideContactDetails
+    ? ""
+    : "Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech";
+
   return (
     <Document>
       {/* Page 1: Cover Page */}
@@ -148,12 +152,18 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
 
         <View style={{ zIndex: 10, paddingBottom: 300 }}>
           {/* Static Comsci Logo from Next.js public directory */}
-          <Image src={origin ? `${origin}/comsci-logo.png` : "/comsci-logo.png"} style={{ width: 140, marginBottom: 15 }} />
+          {!state.hideAboutAndLogo && (
+            <Image src={origin ? `${origin}/comsci-logo.png` : "/comsci-logo.png"} style={{ width: 140, marginBottom: 15 }} />
+          )}
 
           <Text style={[styles.coverDetail, { fontWeight: 'bold', marginBottom: 8 }]}>Prepared by</Text>
           <Text style={[styles.coverDetail, { color: '#F35423', fontWeight: 'bold', fontSize: 16 }]}>Arya Kagathara</Text>
-          <Text style={styles.coverDetail}>CEO & Founder</Text>
-          <Text style={styles.coverDetail}>hello@comsci.tech | www.comsci.tech</Text>
+          {!state.hideContactDetails && (
+            <Text style={styles.coverDetail}>CEO & Founder</Text>
+          )}
+          {!state.hideContactDetails && (
+            <Text style={styles.coverDetail}>hello@comsci.tech | www.comsci.tech</Text>
+          )}
 
           <Text style={[styles.coverDetail, { marginTop: 15 }]}>{formatProposalDate(state.projectDate || new Date().toISOString().split('T')[0])}</Text>
           <Text style={[styles.coverDetail, { fontSize: 9, color: '#6B7280', marginTop: 4 }]}>This proposal is valid for 14 days only.</Text>
@@ -161,28 +171,30 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
       </Page>
 
       {/* Page 2: Introduction & Project Details */}
-      <Page size="A4" style={styles.page}>
-        <Text style={styles.header}>About Comsci</Text>
-        <View style={styles.section}>
-          <Text style={styles.text}>
-            We are a dedicated Design and Development agency with a passion for creating impactful digital experiences.
-            Our core focus is to deliver a modern, intuitive, and visually appealing outcomes that align with your brand identity and enhance user engagement.
-          </Text>
-          <Text style={styles.text}>
-            Our process is built on collaboration, transparency, and a relentless pursuit of excellence. We don't just build websites or design logos; we craft comprehensive digital ecosystems that drive growth and establish a strong market presence.
-          </Text>
-        </View>
-        <Text style={styles.subHeader}>Our Mission</Text>
-        <View style={styles.section}>
-          <Text style={styles.text}>
-            At Comsci, our mission is to empower businesses through innovative technology and exceptional design. We strive to create digital solutions that not only look beautiful but also deliver measurable results. Our vision is to be the leading partner for digital transformation, helping our clients navigate the digital landscape with confidence and success.
-          </Text>
-        </View>
+      {!state.hideAboutAndLogo && (
+        <Page size="A4" style={styles.page}>
+          <Text style={styles.header}>{state.hideContactDetails ? "About Us" : "About Comsci"}</Text>
+          <View style={styles.section}>
+            <Text style={styles.text}>
+              We are a multi-disciplinary Design and Development agency with a passion for creating impactful digital experiences.
+              Our core focus is to deliver a modern, intuitive, and visually appealing outcomes that align with your brand identity and enhance user engagement.
+            </Text>
+            <Text style={styles.text}>
+              Our process is built on collaboration, transparency, and a relentless pursuit of excellence. We don't just build websites or design logos; we craft comprehensive digital ecosystems that drive growth and establish a strong market presence.
+            </Text>
+          </View>
+          <Text style={styles.subHeader}>Our Mission</Text>
+          <View style={styles.section}>
+            <Text style={styles.text}>
+              At Comsci, our mission is to empower businesses through innovative technology and exceptional design. We strive to create digital solutions that not only look beautiful but also deliver measurable results. Our vision is to be the leading partner for digital transformation, helping our clients navigate the digital landscape with confidence and success.
+            </Text>
+          </View>
 
-        <Image src={origin ? `${origin}/services-graphic.png` : "/services-graphic.png"} style={{ marginTop: 20, width: '100%', objectFit: 'contain' }} />
+          <Image src={origin ? `${origin}/services-graphic.png` : "/services-graphic.png"} style={{ marginTop: 20, width: '100%', objectFit: 'contain' }} />
 
-        <Text style={styles.footerText}>Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech</Text>
-      </Page>
+          {footerText ? <Text style={styles.footerText}>{footerText}</Text> : null}
+        </Page>
+      )}
 
       {state.projectDetails && (
         <Page size="A4" style={styles.page}>
@@ -194,7 +206,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
               ))}
             </View>
           </View>
-          <Text style={styles.footerText}>Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech</Text>
+          {footerText ? <Text style={styles.footerText}>{footerText}</Text> : null}
         </Page>
       )}
 
@@ -238,7 +250,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
             {renderCustomText(cleanText(state.customScopeContent), styles)}
           </View>
         )}
-        <Text style={styles.footerText}>Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech</Text>
+        {footerText ? <Text style={styles.footerText}>{footerText}</Text> : null}
       </Page>
 
       {/* Page 4: Project Budget & Milestones, Portfolio */}
@@ -304,7 +316,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
             </View>
           </View>
         )}
-        <Text style={styles.footerText}>Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech</Text>
+        {footerText ? <Text style={styles.footerText}>{footerText}</Text> : null}
       </Page>
 
       {/* Page 5: Terms & Approval */}
@@ -318,7 +330,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
             Such updates will be planned, estimated, and executed separately after the completion and delivery of the initially agreed scope. This ensures that the core project remains on schedule and within the defined timeline and budget.
           </Text>
           <Text style={styles.text}>
-            We are dedicated to delivering our best work and supporting you throughout the project. We are happy to accommodate reasonable adjustments and suggestions along the way with a limit while ensuring that the project stays on track and within the agreed scope. This balance allows us to maintain quality, meet deadlines, and achieve the best results for you.
+            I'm dedicated to delivering our best work and supporting you throughout the project. I'm happy to accommodate reasonable adjustments and suggestions along the way with a limit while ensuring that the project stays on track and within the agreed scope. This balance allows us to maintain quality, meet deadlines, and achieve the best results for you.
           </Text>
         </View>
 
@@ -328,13 +340,13 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
             <Text style={{ fontWeight: 'bold' }}>Quality Assurance & Bug Fixes:</Text> All deliverables will go through a detailed testing and review process before launch. Any issues or bugs will be resolved at no additional cost.
           </Text>
           <Text style={[styles.text, { fontSize: '10px' }]}>
-            <Text style={{ fontWeight: 'bold' }}>Content, Iconography & Visual Assets:</Text> If the client agrees to use royalty-free assets/design assets, the design team will assist in selecting content that best matches the brand’s tone and aesthetics. If the client prefers to use premium or paid icon/images/3D/Illustration/any else sets from third-party marketplaces, they may purchase and provide it.
+            <Text style={{ fontWeight: 'bold' }}>Content, Iconography & Visual Assets:</Text> If the client agrees to use royalty-free assets/design assets, the designer will assist in selecting content that best matches the brand’s tone and aesthetics. If the client prefers to use premium or paid icon/images/3D/Illustration/any else sets from third-party marketplaces, they may purchase and provide it.
           </Text>
           <Text style={[styles.text, { fontSize: '10px' }]}>
-            <Text style={{ fontWeight: 'bold' }}>Third-Party Services & Costs:</Text> Any recurring expenses such as in website/app for server hosting, domain renewals, premium plugins, or third-party API services will be by the client. The development team will assist in setup and configuration to help the save the client’s money.
+            <Text style={{ fontWeight: 'bold' }}>Third-Party Services & Costs:</Text> Any recurring expenses such as in website/app for server hosting, domain renewals, premium plugins, or third-party API services will be by the client. The developer will assist in setup and configuration to help the save the client’s money.
           </Text>
           <Text style={[styles.text, { fontSize: '10px' }]}>
-            <Text style={{ fontWeight: 'bold' }}>Post-Launch Support & Future Collaboration:</Text> The agency will continue to support and maintain the project post-deployment. The team is open to assisting with future updates, feature expansions, or design refreshes as part of a long-term collaboration.
+            <Text style={{ fontWeight: 'bold' }}>Post-Launch Support & Future Collaboration:</Text> I will continue to support and maintain the project post-deployment. I'm open to assisting with future updates, feature expansions, or design refreshes as part of a long-term collaboration.
           </Text>
         </View>
 
@@ -348,7 +360,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
             </Text>
           </View>
         </View>
-        <Text style={styles.footerText}>Comsci Technologies LLP | www.comsci.tech | hello@comsci.tech</Text>
+        {footerText ? <Text style={styles.footerText}>{footerText}</Text> : null}
       </Page>
     </Document >
   );

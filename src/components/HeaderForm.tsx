@@ -54,6 +54,34 @@ export function HeaderForm({
           placeholder="Paste or type the client's job description, project goals, and specific requirements here..."
         />
       </div>
+
+      <div className="pt-3 border-t border-gray-100 space-y-3">
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="hideContactDetails"
+            checked={!!state.hideContactDetails}
+            onChange={(e) => updateField("hideContactDetails", e.target.checked)}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+          />
+          <label htmlFor="hideContactDetails" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+            Hide Comsci branding & contact details (Comsci Technologies LLP, contact info, CEO title) from proposal PDF
+          </label>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="hideAboutAndLogo"
+            checked={!!state.hideAboutAndLogo}
+            onChange={(e) => updateField("hideAboutAndLogo", e.target.checked)}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+          />
+          <label htmlFor="hideAboutAndLogo" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+            Hide "About Us" section & Comsci Logo (for individual / freelancer proposal)
+          </label>
+        </div>
+      </div>
     </div>
   );
 }

@@ -44,6 +44,8 @@ export type ProposalState = {
   totalPrice: string;
   currency: string;
   customScopeContent: string;
+  hideContactDetails?: boolean;
+  hideAboutAndLogo?: boolean;
 };
 
 const defaultState: ProposalState = {
@@ -62,6 +64,8 @@ const defaultState: ProposalState = {
   totalPrice: "",
   currency: "USD",
   customScopeContent: "",
+  hideContactDetails: false,
+  hideAboutAndLogo: false,
 };
 
 export function useProposalState() {
