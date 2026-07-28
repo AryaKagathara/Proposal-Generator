@@ -46,6 +46,7 @@ export type ProposalState = {
   customScopeContent: string;
   hideContactDetails?: boolean;
   hideAboutAndLogo?: boolean;
+  hideMilestones?: boolean;
 };
 
 const defaultState: ProposalState = {
@@ -66,6 +67,7 @@ const defaultState: ProposalState = {
   customScopeContent: "",
   hideContactDetails: false,
   hideAboutAndLogo: false,
+  hideMilestones: false,
 };
 
 export function useProposalState() {

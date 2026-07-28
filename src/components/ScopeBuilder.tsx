@@ -34,8 +34,8 @@ export function ScopeBuilder({
 
   return (
     <div className="space-y-4 p-6 bg-white rounded-xl shadow-sm border border-gray-100">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Project Scope & Timelines</h2>
-      <div className="space-y-3">
+      <h2 className="text-xl font-semibold text-gray-800">Project Scope & Timelines</h2>
+      {/* <div className="space-y-3">
         {SERVICES_DATA.map((cat) => {
           const isExpanded = expandedCats.includes(cat.id);
           const selectedCount = state.selectedScope.filter(s => s.categoryId === cat.id).length;
@@ -114,7 +114,7 @@ export function ScopeBuilder({
                           </label>
                           {checked ? (
                             <textarea
-                              rows={2}
+                              rows={6}
                               value={selectedItem.description}
                               onChange={(e) => updateScopeItemDescription(sub.id, e.target.value)}
                               className="mt-2 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -131,14 +131,14 @@ export function ScopeBuilder({
             </div>
           )
         })}
-      </div>
+      </div> */}
 
-      <div className="mt-8 pt-6 border-t border-gray-100">
+      <div className="pt-6 border-t border-gray-100">
         <label className="block text-sm font-semibold text-gray-800 mb-2">
           Additional Scope Details (Paste AI Content, Titles, Bullet Points)
         </label>
         <textarea
-          rows={6}
+          rows={20}
           value={state.customScopeContent}
           onChange={(e) => updateField("customScopeContent", e.target.value)}
           className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white placeholder-gray-400"

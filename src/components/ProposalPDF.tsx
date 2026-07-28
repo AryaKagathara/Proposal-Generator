@@ -200,6 +200,9 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
         <Page size="A4" style={styles.page}>
           <View>
             <Text style={styles.header}>Project Understanding & Requirements</Text>
+            <Text style={styles.text}>
+              The following outlines the project description and understanding.
+            </Text>
             <View style={styles.projectDetailsBox} wrap={true}>
               {cleanText(state.projectDetails).split('\n').map((para, i) => (
                 <Text key={i} style={styles.text}>{para}</Text>
@@ -212,10 +215,10 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
 
       {/* Page 3: Scope of Work & Timelines */}
       <Page size="A4" style={styles.page}>
-        <Text style={styles.header}>Project Scope & Timelines</Text>
         <View style={styles.section}>
+          <Text style={styles.header}>Project Scope & Timelines</Text>
           <Text style={styles.text}>
-            The following outlines the specific deliverables, services, and timelines included in this project.
+            The following outlines the message, specific deliverables, services, and timelines included in this project.
           </Text>
         </View>
 
@@ -229,7 +232,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
             const items = groupedScope[categoryId];
 
             return (
-              <View key={categoryId} style={{ marginBottom: 15 }}>
+              <View key={categoryId}>
                 <Text style={styles.subHeader}>{cleanText(titleWithTimeline)}</Text>
                 {items.map((item, idx) => (
                   <View key={idx} style={styles.listItem}>
@@ -246,7 +249,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
         )}
 
         {state.customScopeContent && (
-          <View style={[styles.projectDetailsBox, { marginTop: 20 }]} wrap={true}>
+          <View style={[styles.projectDetailsBox]} wrap={true}>
             {renderCustomText(cleanText(state.customScopeContent), styles)}
           </View>
         )}
@@ -261,25 +264,29 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
           <Text style={styles.subHeader}>Total Project Cost: {currencySymbol}{state.totalPrice || '0.00'}</Text>
         </View>
 
-        <Text style={[styles.subHeader]}>Payment Milestones</Text>
-        <View style={[styles.table, { marginTop: 5 }]}>
-          <View style={[styles.tableRow, styles.tableHeader]}>
-            <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Phase</Text></View>
-            <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Percentage</Text></View>
-            <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Amount ({getCurrencySymbol(state.currency || 'USD', true).trim()})</Text></View>
-          </View>
-          {state.paymentMilestones.map((ms) => {
-            const perc = parseFloat(ms.percentage) || 0;
-            const calcAmount = totalBudget * (perc / 100);
-            return (
-              <View key={ms.id} style={styles.tableRow} wrap={false}>
-                <View style={styles.tableColThird}><Text style={styles.tableCell}>{cleanText(ms.name)}</Text></View>
-                <View style={styles.tableColThird}><Text style={styles.tableCell}>{ms.percentage}%</Text></View>
-                <View style={styles.tableColThird}><Text style={styles.tableCell}>{currencySymbol}{calcAmount.toFixed(2)}</Text></View>
+        {!state.hideMilestones && (
+          <>
+            <Text style={[styles.subHeader]}>Payment Milestones</Text>
+            <View style={[styles.table, { marginTop: 5 }]}>
+              <View style={[styles.tableRow, styles.tableHeader]}>
+                <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Phase</Text></View>
+                <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Percentage</Text></View>
+                <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Amount ({getCurrencySymbol(state.currency || 'USD', true).trim()})</Text></View>
               </View>
-            )
-          })}
-        </View>
+              {state.paymentMilestones.map((ms) => {
+                const perc = parseFloat(ms.percentage) || 0;
+                const calcAmount = totalBudget * (perc / 100);
+                return (
+                  <View key={ms.id} style={styles.tableRow} wrap={false}>
+                    <View style={styles.tableColThird}><Text style={styles.tableCell}>{cleanText(ms.name)}</Text></View>
+                    <View style={styles.tableColThird}><Text style={styles.tableCell}>{ms.percentage}%</Text></View>
+                    <View style={styles.tableColThird}><Text style={styles.tableCell}>{currencySymbol}{calcAmount.toFixed(2)}</Text></View>
+                  </View>
+                )
+              })}
+            </View>
+          </>
+        )}
 
         <Text style={[styles.subHeader]}>Payment Mode</Text>
         <View style={styles.section}>

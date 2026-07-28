@@ -123,10 +123,12 @@ export function ProposalGenerator() {
                     <span className="text-gray-500">Scope Items:</span>
                     <span className="font-medium text-blue-600">{state.selectedScope.length}</span>
                   </div>
-                  <div className="flex justify-between border-b border-gray-100 pb-2">
-                    <span className="text-gray-500">Milestones:</span>
-                    <span className="font-medium text-gray-800">{state.paymentMilestones.length}</span>
-                  </div>
+                  {!state.hideMilestones && (
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                      <span className="text-gray-500">Milestones:</span>
+                      <span className="font-medium text-gray-800">{state.paymentMilestones.length}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between pt-2">
                     <span className="text-gray-500 font-medium">Total Cost:</span>
                     <span className="font-bold text-gray-900 text-lg">

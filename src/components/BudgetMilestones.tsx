@@ -51,69 +51,84 @@ export function BudgetMilestones({
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-700">Milestones</h3>
-            <button
-              onClick={addMilestone}
-              className="text-xs text-blue-600 font-medium hover:text-blue-700 transition"
-            >
-              + Add
-            </button>
-          </div>
+        <div className="flex items-center mb-6">
+          <input
+            id="hideMilestones"
+            type="checkbox"
+            checked={state.hideMilestones || false}
+            onChange={(e) => updateField("hideMilestones", e.target.checked)}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+          />
+          <label htmlFor="hideMilestones" className="ml-2 block text-sm text-gray-700 cursor-pointer select-none">
+            Skip milestones
+          </label>
+        </div>
 
-          <div className="space-y-3">
-            {state.paymentMilestones.map((ms, index) => {
-              const perc = parseFloat(ms.percentage) || 0;
-              const calculatedAmount = totalBudget * (perc / 100);
-              const isLast = index === state.paymentMilestones.length - 1;
+        {!state.hideMilestones && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-700">Milestones</h3>
+              <button
+                onClick={addMilestone}
+                className="text-xs text-blue-600 font-medium hover:text-blue-700 transition"
+              >
+                + Add
+              </button>
+            </div>
 
-              return (
-                <div key={ms.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100">
-                  <span className="text-xs font-medium text-gray-500 shrink-0 w-4">{index + 1}.</span>
+            <div className="space-y-3">
+              {state.paymentMilestones.map((ms, index) => {
+                const perc = parseFloat(ms.percentage) || 0;
+                const calculatedAmount = totalBudget * (perc / 100);
+                const isLast = index === state.paymentMilestones.length - 1;
 
-                  <input
-                    type="text"
-                    value={ms.name}
-                    onChange={(e) => updateMilestone(ms.id, "name", e.target.value)}
-                    className="w-[200px] shrink-0 min-w-0 px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Name"
-                  />
+                return (
+                  <div key={ms.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                    <span className="text-xs font-medium text-gray-500 shrink-0 w-4">{index + 1}.</span>
 
-                  <div className="relative w-16 shrink-0">
                     <input
                       type="text"
-                      value={ms.percentage}
-                      onChange={(e) => updateMilestone(ms.id, "percentage", e.target.value)}
-                      className={`w-full pl-2 pr-5 py-1.5 text-xs border ${isOverBudget ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'} rounded-md focus:outline-none focus:ring-2`}
-                      placeholder="0"
+                      value={ms.name}
+                      onChange={(e) => updateMilestone(ms.id, "name", e.target.value)}
+                      className="w-[200px] shrink-0 min-w-0 px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Name"
                     />
-                    <span className="absolute right-1.5 top-1.5 text-gray-500 text-xs">%</span>
+
+                    <div className="relative w-16 shrink-0">
+                      <input
+                        type="text"
+                        value={ms.percentage}
+                        onChange={(e) => updateMilestone(ms.id, "percentage", e.target.value)}
+                        className={`w-full pl-2 pr-5 py-1.5 text-xs border ${isOverBudget ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'} rounded-md focus:outline-none focus:ring-2`}
+                        placeholder="0"
+                      />
+                      <span className="absolute right-1.5 top-1.5 text-gray-500 text-xs">%</span>
+                    </div>
+
+                    <div className="w-[100px] w-16 text-right text-xs font-medium text-gray-700 px-1 py-1.5 bg-white rounded border border-gray-200 shrink-0 truncate">
+                      {currencySymbol}{calculatedAmount.toFixed(0)}
+                    </div>
+
+                    {isLast ? (
+                      <span className="text-[10px] text-gray-400 font-medium shrink-0 w-6 text-center">FIXED</span>
+                    ) : (
+                      <button
+                        onClick={() => removeMilestone(ms.id)}
+                        className="text-[10px] text-red-500 hover:text-red-700 font-medium transition shrink-0 w-6 text-center"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
+                );
+              })}
 
-                  <div className="w-[100px] w-16 text-right text-xs font-medium text-gray-700 px-1 py-1.5 bg-white rounded border border-gray-200 shrink-0 truncate">
-                    {currencySymbol}{calculatedAmount.toFixed(0)}
-                  </div>
-
-                  {isLast ? (
-                    <span className="text-[10px] text-gray-400 font-medium shrink-0 w-6 text-center">FIXED</span>
-                  ) : (
-                    <button
-                      onClick={() => removeMilestone(ms.id)}
-                      className="text-[10px] text-red-500 hover:text-red-700 font-medium transition shrink-0 w-6 text-center"
-                    >
-                      Delete
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-
-            {isOverBudget && (
-              <p className="text-xs text-red-500 font-medium mt-1">Warning: Exceeds 100%.</p>
-            )}
+              {isOverBudget && (
+                <p className="text-xs text-red-500 font-medium mt-1">Warning: Exceeds 100%.</p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
