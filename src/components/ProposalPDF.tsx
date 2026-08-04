@@ -196,6 +196,13 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
         </Page>
       )}
 
+      {!state.hideAboutAndLogo && (
+        <Page size="A4" style={styles.page}>
+          <Image src={origin ? `${origin}/Team.png` : "/Team.png"} style={{ width: '100%', objectFit: 'contain' }} />
+          {footerText ? <Text style={styles.footerText}>{footerText}</Text> : null}
+        </Page>
+      )}
+
       {state.projectDetails && (
         <Page size="A4" style={styles.page}>
           <View>
