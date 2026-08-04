@@ -330,35 +330,37 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
           <Text style={styles.text}>3. Cash if nearby location</Text>
         </View>
 
-        {state.portfolioLinks.length > 0 && (
-          <View style={[styles.section, { marginTop: 20 }]}>
-            <Text style={styles.header}>Portfolio References</Text>
-            <View style={styles.table}>
-              <View style={[styles.tableRow, styles.tableHeader]}>
-                <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Project Name</Text></View>
-                <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Reference Link</Text></View>
-              </View>
-              {state.portfolioLinks.map((link, idx) => {
-                const url = link.url ? link.url.trim() : '';
-                const validUrl = (!url || url.startsWith('http')) ? url : `https://${url}`;
-                return (
-                  <View key={idx} style={styles.tableRow} wrap={false}>
-                    <View style={styles.tableColHalf}><Text style={styles.tableCell}>{cleanText(link.name)}</Text></View>
-                    <View style={styles.tableColHalf}>
-                      {validUrl ? (
-                        <Link src={validUrl} style={styles.link}>{cleanText(url)}</Link>
-                      ) : (
-                        <Text style={styles.tableCell}>{cleanText(url) || "-"}</Text>
-                      )}
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
-        )}
         {footerText ? <Text style={styles.footerText}>{footerText}</Text> : null}
       </Page>
+
+      {state.portfolioLinks.length > 0 && (
+        <Page size="A4" style={styles.page}>
+          <Text style={styles.header}>Portfolio References</Text>
+          <View style={styles.table}>
+            <View style={[styles.tableRow, styles.tableHeader]}>
+              <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Project Name</Text></View>
+              <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Reference Link</Text></View>
+            </View>
+            {state.portfolioLinks.map((link, idx) => {
+              const url = link.url ? link.url.trim() : '';
+              const validUrl = (!url || url.startsWith('http')) ? url : `https://${url}`;
+              return (
+                <View key={idx} style={styles.tableRow} wrap={false}>
+                  <View style={styles.tableColHalf}><Text style={styles.tableCell}>{cleanText(link.name)}</Text></View>
+                  <View style={styles.tableColHalf}>
+                    {validUrl ? (
+                      <Link src={validUrl} style={styles.link}>{cleanText(url)}</Link>
+                    ) : (
+                      <Text style={styles.tableCell}>{cleanText(url) || "-"}</Text>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+          {footerText ? <Text style={styles.footerText}>{footerText}</Text> : null}
+        </Page>
+      )}
 
       {/* Page 5: Terms & Approval */}
       <Page size="A4" style={styles.page}>
