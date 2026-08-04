@@ -1,148 +1,144 @@
 "use client";
 
 import { useProposalState } from "@/hooks/useProposalState";
-import { SERVICES_DATA } from "@/data/services";
-import { ChevronDown, ChevronUp, Check } from "lucide-react";
-import { useState } from "react";
+import { Plus, Trash2, Calendar } from "lucide-react";
 
 export function ScopeBuilder({
   state,
   updateField,
-  addScopeItem,
-  removeScopeItem,
-  updateScopeItemDescription,
-  updateCategoryTimeline,
-  toggleCategoryScope
+  addPhase,
+  updatePhase,
+  removePhase,
+  addDeliverable,
+  updateDeliverable,
+  removeDeliverable
 }: {
   state: ReturnType<typeof useProposalState>["state"];
   updateField: ReturnType<typeof useProposalState>["updateField"];
-  addScopeItem: ReturnType<typeof useProposalState>["addScopeItem"];
-  removeScopeItem: ReturnType<typeof useProposalState>["removeScopeItem"];
-  updateScopeItemDescription: ReturnType<typeof useProposalState>["updateScopeItemDescription"];
-  updateCategoryTimeline: ReturnType<typeof useProposalState>["updateCategoryTimeline"];
-  toggleCategoryScope: ReturnType<typeof useProposalState>["toggleCategoryScope"];
+  addPhase: ReturnType<typeof useProposalState>["addPhase"];
+  updatePhase: ReturnType<typeof useProposalState>["updatePhase"];
+  removePhase: ReturnType<typeof useProposalState>["removePhase"];
+  addDeliverable: ReturnType<typeof useProposalState>["addDeliverable"];
+  updateDeliverable: ReturnType<typeof useProposalState>["updateDeliverable"];
+  removeDeliverable: ReturnType<typeof useProposalState>["removeDeliverable"];
 }) {
-  const [expandedCats, setExpandedCats] = useState<string[]>([]);
-
-  const toggleCat = (id: string, e: React.MouseEvent) => {
-    // prevent toggling if user clicks on the timeline input
-    if ((e.target as HTMLElement).tagName === 'INPUT') return;
-    setExpandedCats(prev =>
-      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
-    );
-  };
-
   return (
-    <div className="space-y-4 p-6 bg-white rounded-xl shadow-sm border border-gray-100">
-      <h2 className="text-xl font-semibold text-gray-800">Project Scope & Timelines</h2>
-      {/* <div className="space-y-3">
-        {SERVICES_DATA.map((cat) => {
-          const isExpanded = expandedCats.includes(cat.id);
-          const selectedCount = state.selectedScope.filter(s => s.categoryId === cat.id).length;
-          const isAllSelected = selectedCount === cat.items.length && cat.items.length > 0;
+    <div className="space-y-6 p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800">Project Scope & Phases</h2>
+          <p className="text-xs text-gray-500 mt-1">Define project implementation phases and deliverables for each phase.</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={!state.hideScopeTimeline}
+              onChange={(e) => updateField("hideScopeTimeline", !e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+            />
+            Show Timelines
+          </label>
+          <button
+            onClick={addPhase}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition"
+          >
+            <Plus size={14} /> Add Phase
+          </button>
+        </div>
+      </div>
 
-          return (
-            <div key={cat.id} className={`border ${selectedCount > 0 ? "border-blue-200" : "border-gray-200"} rounded-lg overflow-hidden`}>
-              <div
-                onClick={(e) => toggleCat(cat.id, e)}
-                className={`w-full flex items-center justify-between p-4 cursor-pointer transition ${selectedCount > 0 ? "bg-blue-50 hover:bg-blue-100" : "bg-gray-50 hover:bg-gray-100"}`}
-              >
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="pt-1 flex items-center justify-center mr-1" onClick={e => e.stopPropagation()}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCategoryScope(cat.id, cat.items, !isAllSelected);
-                      }}
-                      className={`w-5 h-5 rounded border ${isAllSelected ? 'bg-blue-500 border-blue-500 flex items-center justify-center' : 'border-gray-300 bg-white'}`}
-                      title={isAllSelected ? "Deselect All" : "Select All"}
-                    >
-                      {isAllSelected && <Check size={14} className="text-white" />}
-                    </button>
-                  </div>
-                  <span className="font-medium text-gray-800 whitespace-nowrap">{cat.title}</span>
-                  {selectedCount > 0 && (
-                    <>
-                      <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                        {selectedCount} selected
-                      </span>
-                      <div className="ml-auto mr-4 max-w-[200px]" onClick={e => e.stopPropagation()}>
-                        <input
-                          type="text"
-                          placeholder="Timeline (e.g. 2 Weeks)"
-                          value={state.categoryTimelines[cat.id] || ""}
-                          onChange={(e) => updateCategoryTimeline(cat.id, e.target.value)}
-                          className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-                {isExpanded ? <ChevronUp size={20} className="text-gray-500 flex-shrink-0" /> : <ChevronDown size={20} className="text-gray-500 flex-shrink-0" />}
+      <div className="space-y-4">
+        {state.phases.map((phase, index) => (
+          <div key={phase.id} className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+              <div className="flex-1 w-full sm:w-auto">
+                <input
+                  type="text"
+                  placeholder={`Phase ${index + 1} Name`}
+                  value={phase.name}
+                  onChange={(e) => updatePhase(phase.id, "name", e.target.value)}
+                  className="w-full font-semibold text-gray-800 bg-transparent border-b border-dashed border-gray-300 focus:border-blue-500 focus:outline-none pb-1 text-base"
+                />
               </div>
 
-              {isExpanded && (
-                <div className="p-4 bg-white space-y-4 border-t border-gray-100">
-                  {cat.items.map((sub) => {
-                    const selectedItem = state.selectedScope.find(s => s.subServiceId === sub.id);
-                    const checked = !!selectedItem;
-
-                    return (
-                      <div key={sub.id} className="flex gap-3">
-                        <div className="pt-1">
-                          <button
-                            onClick={() => {
-                              if (checked) {
-                                removeScopeItem(sub.id);
-                              } else {
-                                addScopeItem({
-                                  categoryId: cat.id,
-                                  subServiceId: sub.id,
-                                  label: sub.label,
-                                  description: sub.defaultDescription
-                                });
-                              }
-                            }}
-                            className={`w-5 h-5 rounded border ${checked ? 'bg-blue-500 border-blue-500 flex items-center justify-center' : 'border-gray-300'}`}
-                          >
-                            {checked && <Check size={14} className="text-white" />}
-                          </button>
-                        </div>
-                        <div className="flex-1">
-                          <label className={`block font-medium ${checked ? 'text-gray-900' : 'text-gray-600'}`}>
-                            {sub.label}
-                          </label>
-                          {checked ? (
-                            <textarea
-                              rows={6}
-                              value={selectedItem.description}
-                              onChange={(e) => updateScopeItemDescription(sub.id, e.target.value)}
-                              className="mt-2 w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                          ) : (
-                            <p className="text-sm text-gray-500 mt-1">{sub.defaultDescription}</p>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+              <div className="flex gap-2 w-full sm:w-auto items-center">
+                {!state.hideScopeTimeline && (
+                  <div className="relative flex-1 sm:w-40">
+                    <span className="absolute left-2.5 top-2 text-gray-400">
+                      <Calendar size={14} />
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="Duration (e.g. 2 Weeks)"
+                      value={phase.duration}
+                      onChange={(e) => updatePhase(phase.id, "duration", e.target.value)}
+                      className="w-full pl-8 pr-3 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    />
+                  </div>
+                )}
+                <button
+                  onClick={() => removePhase(phase.id)}
+                  className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition"
+                  title="Delete Phase"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
-          )
-        })}
-      </div> */}
+
+            {/* Deliverables */}
+            <div className="pl-2 sm:pl-4 border-l-2 border-gray-200/80 space-y-3">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Deliverables & Details</div>
+              {phase.deliverables.map((del) => (
+                <div key={del.id} className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm space-y-2 relative group">
+                  <div className="flex justify-between items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Deliverable title (e.g. UI/UX Wireframes)"
+                      value={del.label}
+                      onChange={(e) => updateDeliverable(phase.id, del.id, "label", e.target.value)}
+                      className="w-full text-sm font-medium text-gray-700 focus:outline-none focus:border-b border-blue-500 pb-0.5"
+                    />
+                    <button
+                      onClick={() => removeDeliverable(phase.id, del.id)}
+                      className="text-gray-400 hover:text-red-500 p-1 hover:bg-gray-100 rounded transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      title="Remove Deliverable"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                  <textarea
+                    rows={2}
+                    placeholder="Describe the deliverables in detail..."
+                    value={del.description}
+                    onChange={(e) => updateDeliverable(phase.id, del.id, "description", e.target.value)}
+                    className="w-full text-xs text-gray-500 border-none resize-none focus:outline-none focus:ring-0 p-0"
+                  />
+                </div>
+              ))}
+
+              <button
+                onClick={() => addDeliverable(phase.id)}
+                className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-2 py-1.5 rounded transition"
+              >
+                <Plus size={12} /> Add Deliverable
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <div className="pt-6 border-t border-gray-100">
         <label className="block text-sm font-semibold text-gray-800 mb-2">
-          Additional Scope Details (Paste AI Content, Titles, Bullet Points)
+          Additional Notes or Future Scope Details
         </label>
         <textarea
-          rows={20}
+          rows={6}
           value={state.customScopeContent}
           onChange={(e) => updateField("customScopeContent", e.target.value)}
           className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white placeholder-gray-400"
-          placeholder="e.g. # Advanced Features&#10;- User Authentication&#10;- Payment Integration"
+          placeholder="e.g. # Future Phases&#10;- Advanced search capabilities&#10;- Localization (Multi-language)"
         />
       </div>
     </div>

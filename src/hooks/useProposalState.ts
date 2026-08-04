@@ -24,6 +24,19 @@ export type PortfolioLink = {
   url: string;
 };
 
+export type PhaseDeliverable = {
+  id: string;
+  label: string;
+  description: string;
+};
+
+export type Phase = {
+  id: string;
+  name: string;
+  duration: string;
+  deliverables: PhaseDeliverable[];
+};
+
 export type SelectedScopeItem = {
   categoryId: string;
   subServiceId: string;
@@ -47,6 +60,8 @@ export type ProposalState = {
   hideContactDetails?: boolean;
   hideAboutAndLogo?: boolean;
   hideMilestones?: boolean;
+  hideScopeTimeline?: boolean;
+  phases: Phase[];
 };
 
 const defaultState: ProposalState = {
@@ -68,6 +83,17 @@ const defaultState: ProposalState = {
   hideContactDetails: false,
   hideAboutAndLogo: false,
   hideMilestones: false,
+  hideScopeTimeline: false,
+  phases: [
+    {
+      id: "phase-1",
+      name: "Discovery & Design",
+      duration: "2 Weeks",
+      deliverables: [
+        { id: "del-1-1", label: "Wireframes & Mockups", description: "Design layouts and interactive prototype of the key screens." }
+      ]
+    }
+  ]
 };
 
 export function useProposalState() {
@@ -78,7 +104,20 @@ export function useProposalState() {
     const stored = localStorage.getItem("proposalGenState_v2");
     if (stored) {
       try {
-        setState(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        if (!parsed.phases) {
+          parsed.phases = [
+            {
+              id: "phase-1",
+              name: "Discovery & Design",
+              duration: "2 Weeks",
+              deliverables: [
+                { id: "del-1-1", label: "Wireframes & Mockups", description: "Design layouts and interactive prototype of the key screens." }
+              ]
+            }
+          ];
+        }
+        setState(parsed);
       } catch (e) {
         console.error("Failed to parse stored state.");
       }
@@ -204,6 +243,74 @@ export function useProposalState() {
     }));
   };
 
+  const addPhase = () => {
+    setState((prev) => {
+      const nextIndex = prev.phases.length + 1;
+      const newPhase: Phase = {
+        id: `phase-${Math.random().toString(36).substr(2, 9)}`,
+        name: `Phase ${nextIndex}: New Phase`,
+        duration: "",
+        deliverables: []
+      };
+      return { ...prev, phases: [...prev.phases, newPhase] };
+    });
+  };
+
+  const updatePhase = (id: string, field: 'name' | 'duration', value: string) => {
+    setState((prev) => ({
+      ...prev,
+      phases: prev.phases.map((p) => p.id === id ? { ...p, [field]: value } : p)
+    }));
+  };
+
+  const removePhase = (id: string) => {
+    setState((prev) => ({
+      ...prev,
+      phases: prev.phases.filter((p) => p.id !== id)
+    }));
+  };
+
+  const addDeliverable = (phaseId: string) => {
+    setState((prev) => ({
+      ...prev,
+      phases: prev.phases.map((p) => {
+        if (p.id !== phaseId) return p;
+        const newDel: PhaseDeliverable = {
+          id: `del-${Math.random().toString(36).substr(2, 9)}`,
+          label: "",
+          description: ""
+        };
+        return { ...p, deliverables: [...p.deliverables, newDel] };
+      })
+    }));
+  };
+
+  const updateDeliverable = (phaseId: string, deliverableId: string, field: 'label' | 'description', value: string) => {
+    setState((prev) => ({
+      ...prev,
+      phases: prev.phases.map((p) => {
+        if (p.id !== phaseId) return p;
+        return {
+          ...p,
+          deliverables: p.deliverables.map((d) => d.id === deliverableId ? { ...d, [field]: value } : d)
+        };
+      })
+    }));
+  };
+
+  const removeDeliverable = (phaseId: string, deliverableId: string) => {
+    setState((prev) => ({
+      ...prev,
+      phases: prev.phases.map((p) => {
+        if (p.id !== phaseId) return p;
+        return {
+          ...p,
+          deliverables: p.deliverables.filter((d) => d.id !== deliverableId)
+        };
+      })
+    }));
+  };
+
   return {
     state,
     isLoaded,
@@ -219,6 +326,12 @@ export function useProposalState() {
     removeMilestone,
     addPortfolioLink,
     updatePortfolioLink,
-    removePortfolioLink
+    removePortfolioLink,
+    addPhase,
+    updatePhase,
+    removePhase,
+    addDeliverable,
+    updateDeliverable,
+    removeDeliverable
   };
 }

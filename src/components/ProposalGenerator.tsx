@@ -88,11 +88,12 @@ export function ProposalGenerator() {
             <ScopeBuilder
               state={state}
               updateField={actions.updateField}
-              addScopeItem={actions.addScopeItem}
-              removeScopeItem={actions.removeScopeItem}
-              updateScopeItemDescription={actions.updateScopeItemDescription}
-              updateCategoryTimeline={actions.updateCategoryTimeline}
-              toggleCategoryScope={actions.toggleCategoryScope}
+              addPhase={actions.addPhase}
+              updatePhase={actions.updatePhase}
+              removePhase={actions.removePhase}
+              addDeliverable={actions.addDeliverable}
+              updateDeliverable={actions.updateDeliverable}
+              removeDeliverable={actions.removeDeliverable}
             />
             <PricingPortfolio
               state={state}

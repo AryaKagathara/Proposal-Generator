@@ -114,6 +114,9 @@ const styles = StyleSheet.create({
   tableHeader: { backgroundColor: '#F3FAF7' }, // Light tint for table headers
   tableColHalf: { width: '50%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' },
   tableColThird: { width: '33.33%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' },
+  phaseColName: { width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' },
+  phaseColDuration: { width: '20%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' },
+  phaseColDeliverables: { width: '50%', padding: 8 },
   tableCellHeader: { fontSize: 10, fontWeight: 'bold', color: '#111827' },
   tableCell: { fontSize: 10, color: '#4B5563' },
   link: { fontSize: 10, color: '#F35423', textDecoration: 'none' },
@@ -124,11 +127,6 @@ const styles = StyleSheet.create({
 });
 
 export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState, origin?: string }) => {
-  const groupedScope: Record<string, typeof state.selectedScope> = {};
-  state.selectedScope.forEach(item => {
-    if (!groupedScope[item.categoryId]) groupedScope[item.categoryId] = [];
-    groupedScope[item.categoryId].push(item);
-  });
 
   const totalBudget = parseFloat(state.totalPrice) || 0;
   // Use safe string codes (USD, INR) for the PDF instead of symbols (₹) to prevent Helvetica font crashes
@@ -173,7 +171,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
       {/* Page 2: Introduction & Project Details */}
       {!state.hideAboutAndLogo && (
         <Page size="A4" style={styles.page}>
-          <Text style={styles.header}>{state.hideContactDetails ? "About Us" : "About Comsci"}</Text>
+          <Text style={styles.header}>About Comsci</Text>
           <View style={styles.section}>
             <Text style={styles.text}>
               We are a multi-disciplinary Design and Development agency with a passion for creating impactful digital experiences.
@@ -186,7 +184,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
           <Text style={styles.subHeader}>Our Mission</Text>
           <View style={styles.section}>
             <Text style={styles.text}>
-              At Comsci, our mission is to empower businesses through innovative technology and exceptional design. We strive to create digital solutions that not only look beautiful but also deliver measurable results. Our vision is to be the leading partner for digital transformation, helping our clients navigate the digital landscape with confidence and success.
+              Mission is to empower businesses through innovative technology and exceptional design. We strive to create digital solutions that not only look beautiful but also deliver measurable results. Our vision is to be the leading partner for digital transformation, helping our clients navigate the digital landscape with confidence and success.
             </Text>
           </View>
 
@@ -225,34 +223,63 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
         <View style={styles.section}>
           <Text style={styles.header}>Project Scope & Timelines</Text>
           <Text style={styles.text}>
-            The following outlines the message, specific deliverables, services, and timelines included in this project.
+            The following outlines the implementation phases, specific deliverables, and timelines included in this project.
           </Text>
         </View>
 
-        {Object.keys(groupedScope).length === 0 && !state.customScopeContent ? (
-          <Text style={styles.text}>No scope items selected.</Text>
+        {(!state.phases || state.phases.length === 0) && !state.customScopeContent ? (
+          <Text style={styles.text}>No scope items or phases defined.</Text>
         ) : (
-          Object.keys(groupedScope).map((categoryId) => {
-            const categoryTitle = SERVICES_DATA.find(c => c.id === categoryId)?.title || categoryId;
-            const timeline = state.categoryTimelines[categoryId];
-            const titleWithTimeline = timeline ? `${categoryTitle} - ${timeline}` : categoryTitle;
-            const items = groupedScope[categoryId];
+          <>
+            {state.phases && state.phases.length > 0 && (() => {
+              const showTimeline = !state.hideScopeTimeline;
+              const colPhaseStyle = { width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' };
+              const colDeliverablesStyle = {
+                width: showTimeline ? '50%' : '70%',
+                padding: 8,
+                borderRightWidth: showTimeline ? 1 : 0,
+                borderRightColor: '#E5E7EB'
+              };
+              const colDurationStyle = { width: '20%', padding: 8 };
 
-            return (
-              <View key={categoryId}>
-                <Text style={styles.subHeader}>{cleanText(titleWithTimeline)}</Text>
-                {items.map((item, idx) => (
-                  <View key={idx} style={styles.listItem}>
-                    <Text style={styles.bullet}>•</Text>
-                    <View style={styles.listItemContent}>
-                      <Text style={styles.listItemTitle}>{cleanText(item.label)}</Text>
-                      <Text style={styles.listItemDesc}>{cleanText(item.description)}</Text>
-                    </View>
+              return (
+                <View style={[styles.table, { marginTop: 10 }]}>
+                  <View style={[styles.tableRow, styles.tableHeader]}>
+                    <View style={colPhaseStyle}><Text style={styles.tableCellHeader}>Phase</Text></View>
+                    <View style={colDeliverablesStyle}><Text style={styles.tableCellHeader}>Scope / Deliverables</Text></View>
+                    {showTimeline && (
+                      <View style={colDurationStyle}><Text style={styles.tableCellHeader}>Timeline</Text></View>
+                    )}
                   </View>
-                ))}
-              </View>
-            );
-          })
+                  {state.phases.map((phase) => (
+                    <View key={phase.id} style={styles.tableRow} wrap={false}>
+                      <View style={colPhaseStyle}>
+                        <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#111827' }]}>{cleanText(phase.name)}</Text>
+                      </View>
+                      <View style={colDeliverablesStyle}>
+                        {phase.deliverables.map((del, dIdx) => (
+                          <View key={del.id} style={{ marginBottom: dIdx === phase.deliverables.length - 1 ? 0 : 8 }}>
+                            <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#1F2937' }]}>{cleanText(del.label)}</Text>
+                            {del.description ? (
+                              <Text style={[styles.tableCell, { color: '#6B7280', fontSize: 9, marginTop: 2 }]}>
+                                {cleanText(del.description)}
+                              </Text>
+                            ) : null}
+                          </View>
+                        ))}
+                        {phase.deliverables.length === 0 && <Text style={[styles.tableCell, { color: '#9CA3AF' }]}>No deliverables listed.</Text>}
+                      </View>
+                      {showTimeline && (
+                        <View style={colDurationStyle}>
+                          <Text style={styles.tableCell}>{cleanText(phase.duration || '-')}</Text>
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              );
+            })()}
+          </>
         )}
 
         {state.customScopeContent && (
@@ -335,32 +362,28 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
 
       {/* Page 5: Terms & Approval */}
       <Page size="A4" style={styles.page}>
-        <Text style={styles.header}>Additional Features & Future Scope</Text>
+        <Text style={styles.header}>Terms & Conditions</Text>
         <View style={styles.section}>
-          <Text style={styles.text}>
-            Any additional features, complex functionalities, or requirements not mentioned/included in the current project scope will be treated as part of a future phase or as a project extension.
+          <Text style={[styles.text, { fontSize: '9px', marginBottom: 6 }]}>
+            1. Scope Timeline & Client Feedback: The project timeline is structured for within the estimated duration or earlier as well, assuming timely feedback within 24-48 hours. Delays in client feedback may extend the overall schedule. The timeline begins after the receipt of the initial payment and all required content/materials for the project from the client.
           </Text>
-          <Text style={styles.text}>
-            Such updates will be planned, estimated, and executed separately after the completion and delivery of the initially agreed scope. This ensures that the core project remains on schedule and within the defined timeline and budget.
+          <Text style={[styles.text, { fontSize: '9px', marginBottom: 6 }]}>
+            2. Quality Assurance & Bug Fixes: All deliverables will go through a detailed testing and review process before launch. Any issues or bugs will be resolved at no additional cost.
           </Text>
-          <Text style={styles.text}>
-            I'm dedicated to delivering our best work and supporting you throughout the project. I'm happy to accommodate reasonable adjustments and suggestions along the way with a limit while ensuring that the project stays on track and within the agreed scope. This balance allows us to maintain quality, meet deadlines, and achieve the best results for you.
+          <Text style={[styles.text, { fontSize: '9px', marginBottom: 6 }]}>
+            3. Content, Iconography & Visual Assets: If the client agrees to use royalty-free assets/design assets, I will assist in selecting content that best matches the brand’s tone and aesthetics. If the client prefers to use premium or paid icon/images/3D/Illustration/any other sets from third-party marketplaces, they may purchase and provide them.
           </Text>
-        </View>
-
-        <Text style={styles.header}>Project Notes & Terms</Text>
-        <View style={styles.section}>
-          <Text style={[styles.text, { fontSize: '10px' }]}>
-            <Text style={{ fontWeight: 'bold' }}>Quality Assurance & Bug Fixes:</Text> All deliverables will go through a detailed testing and review process before launch. Any issues or bugs will be resolved at no additional cost.
+          <Text style={[styles.text, { fontSize: '9px', marginBottom: 6 }]}>
+            4. Third-Party Services & Costs: Any recurring expenses such as server hosting, domain renewals, premium plugins, or third-party API services will be borne by the client. I will assist in setup and configuration to help optimize the client's costs.
           </Text>
-          <Text style={[styles.text, { fontSize: '10px' }]}>
-            <Text style={{ fontWeight: 'bold' }}>Content, Iconography & Visual Assets:</Text> If the client agrees to use royalty-free assets/design assets, the designer will assist in selecting content that best matches the brand’s tone and aesthetics. If the client prefers to use premium or paid icon/images/3D/Illustration/any else sets from third-party marketplaces, they may purchase and provide it.
+          <Text style={[styles.text, { fontSize: '9px', marginBottom: 6 }]}>
+            5. Post-Launch Support & Future Collaboration: I will continue to support and maintain the project post-deployment. I'm open to assisting with future updates, feature expansions, or design refreshes as part of a long-term collaboration.
           </Text>
-          <Text style={[styles.text, { fontSize: '10px' }]}>
-            <Text style={{ fontWeight: 'bold' }}>Third-Party Services & Costs:</Text> Any recurring expenses such as in website/app for server hosting, domain renewals, premium plugins, or third-party API services will be by the client. The developer will assist in setup and configuration to help the save the client’s money.
+          <Text style={[styles.text, { fontSize: '9px', marginBottom: 6 }]}>
+            6. Additional Features & Future Scope: Any additional features, complex functionalities, or requirements not mentioned/included in the current project scope will be treated as part of a future phase or as a project extension. Such updates will be planned, estimated, and executed separately. I is happy to accommodate reasonable adjustments along the way while ensuring the core project stays on track.
           </Text>
-          <Text style={[styles.text, { fontSize: '10px' }]}>
-            <Text style={{ fontWeight: 'bold' }}>Post-Launch Support & Future Collaboration:</Text> I will continue to support and maintain the project post-deployment. I'm open to assisting with future updates, feature expansions, or design refreshes as part of a long-term collaboration.
+          <Text style={[styles.text, { fontSize: '9px', marginBottom: 6 }]}>
+            7. Termination Policy: Immediate termination if client's misconduct, negligence, contract breach, or harmful/abusive behavior. Either party may terminate with notice. If terminated by the client, all work done and completed milestones must be paid, and the advance payment remains non-refundable. Handover of project files and return of client materials is subject to full settlement of all outstanding fees. Developer retains ownership of all intellectual property, designs, and source code until final payment is settled in full.
           </Text>
         </View>
 
