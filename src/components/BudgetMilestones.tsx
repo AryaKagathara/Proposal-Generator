@@ -36,6 +36,11 @@ export function BudgetMilestones({
               <option value="USD">USD</option>
               <option value="EURO">EURO</option>
               <option value="GBP">GBP</option>
+              <option value="AUD">AUD</option>
+              <option value="CAD">CAD</option>
+              <option value="SGD">SGD</option>
+              <option value="AED">AED</option>
+              <option value="SAR">SAR</option>
               <option value="RUPEE">INR</option>
             </select>
             <div className="relative flex-1">

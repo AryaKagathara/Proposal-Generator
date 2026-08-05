@@ -13,6 +13,11 @@ export const getCurrencySymbol = (currency: string, forPdf = false) => {
     case 'EURO': return 'EURO ';
     case 'GBP': return 'GBP ';
     case 'RUPEE': return 'INR ';
+    case 'AUD': return 'AUD ';
+    case 'CAD': return 'CAD ';
+    case 'SGD': return 'SGD ';
+    case 'AED': return 'AED ';
+    case 'SAR': return 'SAR ';
     case 'USD':
     default: return 'USD ';
   }
@@ -150,7 +155,7 @@ export function useProposalState() {
   const updateScopeItemDescription = (subServiceId: string, description: string) => {
     setState((prev) => ({
       ...prev,
-      selectedScope: prev.selectedScope.map((i) => 
+      selectedScope: prev.selectedScope.map((i) =>
         i.subServiceId === subServiceId ? { ...i, description } : i
       )
     }));
@@ -193,7 +198,7 @@ export function useProposalState() {
     setState((prev) => {
       // Insert new milestone before the last item (which is always the Final Delivery)
       const milestones = [...prev.paymentMilestones];
-      
+
       // If there are no milestones, just add it. Otherwise, insert before the last one.
       if (milestones.length === 0) {
         milestones.push(newMilestone);
@@ -201,7 +206,7 @@ export function useProposalState() {
         const lastMilestone = milestones.pop()!;
         milestones.push(newMilestone, lastMilestone);
       }
-      
+
       return { ...prev, paymentMilestones: milestones };
     });
   };
