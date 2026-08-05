@@ -66,7 +66,7 @@ export function ProposalGenerator() {
             ) : (
               <PDFDownloadLink
                 document={pdfDocument}
-                fileName={`Proposal_${state.clientName.replace(/\s+/g, '_') || 'Client'}_${state.projectDate.replace(/\s+/g, '_') || 'Date'}.pdf`}
+                fileName={`PDF-Proposal_${state.clientName.replace(/\s+/g, '_') || 'Client'}_${state.projectDate.replace(/\s+/g, '_') || 'Date'}.pdf`}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition shadow-sm"
               >
                 {({ loading, error }) => (
@@ -151,7 +151,7 @@ export function ProposalGenerator() {
                   ) : (
                     <PDFDownloadLink
                       document={pdfDocument}
-                      fileName={`Proposal_${state.clientName.replace(/\s+/g, '_') || 'Client'}_${state.projectDate.replace(/\s+/g, '_') || 'Date'}.pdf`}
+                      fileName={`PDF-Proposal_${state.clientName.replace(/\s+/g, '_') || 'Client'}_${state.projectDate.replace(/\s+/g, '_') || 'Date'}.pdf`}
                       className="inline-flex w-full justify-center items-center gap-2 px-5 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition shadow-sm"
                     >
                       {({ loading, error }) => (
