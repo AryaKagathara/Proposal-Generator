@@ -56,6 +56,19 @@ export function HeaderForm({
       </div>
 
       <div className="pt-3 border-t border-gray-100 space-y-3">
+        <div className="flex items-center gap-3 mb-2">
+          <input
+            type="checkbox"
+            id="isPreliminaryQuote"
+            checked={!!state.isPreliminaryQuote}
+            onChange={(e) => updateField("isPreliminaryQuote", e.target.checked)}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+          />
+          <label htmlFor="isPreliminaryQuote" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+            Preliminary Quotation (uncheck for Final Quotation)
+          </label>
+        </div>
+
         <div className="flex items-center gap-3">
           <input
             type="checkbox"

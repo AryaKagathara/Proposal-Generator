@@ -66,6 +66,8 @@ export type ProposalState = {
   hideAboutAndLogo?: boolean;
   hideMilestones?: boolean;
   hideScopeTimeline?: boolean;
+  isPreliminaryQuote?: boolean;
+  isFinalQuotation?: boolean;
   phases: Phase[];
 };
 
@@ -89,6 +91,8 @@ const defaultState: ProposalState = {
   hideAboutAndLogo: false,
   hideMilestones: false,
   hideScopeTimeline: false,
+  isPreliminaryQuote: false,
+  isFinalQuotation: false,
   phases: [
     {
       id: "phase-1",

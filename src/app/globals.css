@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-google-sans);
   --color-blue-50: #feece8;
   --color-blue-100: #fdd5c9;
   --color-blue-200: #fbab93;
