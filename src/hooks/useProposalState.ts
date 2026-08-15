@@ -352,6 +352,43 @@ export function useProposalState() {
     }));
   };
 
+  const importProposalData = (data: Partial<ProposalState>) => {
+    setState((prev) => {
+      const next = { ...prev };
+      if (data.clientName !== undefined) next.clientName = data.clientName;
+      if (data.totalPrice !== undefined) next.totalPrice = data.totalPrice;
+      if (data.customScopeContent !== undefined) next.customScopeContent = data.customScopeContent;
+      if (data.phases !== undefined) {
+        next.phases = data.phases.map((p) => ({
+          id: p.id || `phase-${Math.random().toString(36).substr(2, 9)}`,
+          name: p.name,
+          duration: p.duration,
+          deliverables: (p.deliverables || []).map((d) => ({
+            id: d.id || `del-${Math.random().toString(36).substr(2, 9)}`,
+            label: d.label,
+            description: d.description,
+          })),
+        }));
+      }
+      if (data.paymentMilestones !== undefined) {
+        next.paymentMilestones = data.paymentMilestones.map((m) => ({
+          id: m.id || `ms-${Math.random().toString(36).substr(2, 9)}`,
+          name: m.name,
+          percentage: m.percentage,
+        }));
+      }
+      if (data.portfolioLinks !== undefined) {
+        next.portfolioLinks = data.portfolioLinks.map((pl) => ({
+          id: pl.id || `pl-${Math.random().toString(36).substr(2, 9)}`,
+          name: pl.name,
+          url: pl.url,
+        }));
+        next.portfolioRawText = data.portfolioLinks.map((pl) => `${pl.name}\n${pl.url}`).join("\n\n");
+      }
+      return next;
+    });
+  };
+
   return {
     state,
     isLoaded,
@@ -373,6 +410,7 @@ export function useProposalState() {
     removePhase,
     addDeliverable,
     updateDeliverable,
-    removeDeliverable
+    removeDeliverable,
+    importProposalData
   };
 }

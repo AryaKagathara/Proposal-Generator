@@ -7,13 +7,15 @@ import { PricingPortfolio } from "./PricingPortfolio";
 import { BudgetMilestones } from "./BudgetMilestones";
 import { ProposalDocument } from "./ProposalPDF";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import { FileDown, RefreshCw } from "lucide-react";
+import { FileDown, RefreshCw, Sparkles } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
+import { AiSidebar } from "./AiSidebar";
 
 export function ProposalGenerator() {
   const { state, isLoaded, saveState, ...actions } = useProposalState();
   const [isClient, setIsClient] = useState(false);
   const [activeGenerator, setActiveGenerator] = useState<'header' | 'sidebar' | null>(null);
+  const [isAiOpen, setIsAiOpen] = useState(false);
 
   // Invalidate the PDF if the user types anything
   useEffect(() => {
@@ -66,7 +68,15 @@ export function ProposalGenerator() {
             </p>
           </div>
 
-          <div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsAiOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition shadow-sm"
+            >
+              <Sparkles size={18} />
+              Use AI
+            </button>
+
             {activeGenerator !== 'header' ? (
               <button
                 onClick={() => { saveState(); setActiveGenerator('header'); }}
@@ -212,6 +222,12 @@ export function ProposalGenerator() {
 
         </div>
       </div>
+
+      <AiSidebar
+        isOpen={isAiOpen}
+        onClose={() => setIsAiOpen(false)}
+        onApply={actions.importProposalData}
+      />
     </div>
   );
 }

@@ -424,7 +424,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
               <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Design</Text>
             </View>
             <View style={{ width: '70%', padding: 8 }}>
-              <Text style={styles.tableCell}>Figma, Photoshop, Illustrator, Canva</Text>
+              <Text style={styles.tableCell}>Figma, Adobe Illustrator, Adobe Photoshop, Affinity, Canva, Google Slides, Microsoft Office Suites </Text>
             </View>
           </View>
 
