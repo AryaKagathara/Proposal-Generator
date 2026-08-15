@@ -31,6 +31,12 @@ export function ProposalGenerator() {
     return `${prefix}_${client}_${date}.pdf`;
   }, [state.isPreliminaryQuote, state.clientName, state.projectDate]);
 
+  const isMilestonesExceeded = useMemo(() => {
+    if (state.hideMilestones) return false;
+    const currentTotalPercent = state.paymentMilestones.reduce((acc, ms) => acc + (parseFloat(ms.percentage) || 0), 0);
+    return currentTotalPercent > 100;
+  }, [state.paymentMilestones, state.hideMilestones]);
+
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -64,25 +70,37 @@ export function ProposalGenerator() {
             {activeGenerator !== 'header' ? (
               <button
                 onClick={() => { saveState(); setActiveGenerator('header'); }}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 ${activeGenerator === 'sidebar' ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition shadow-sm`}
-                disabled={activeGenerator === 'sidebar'}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 ${activeGenerator === 'sidebar' || isMilestonesExceeded ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'} text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition shadow-sm`}
+                disabled={activeGenerator === 'sidebar' || isMilestonesExceeded}
+                title={isMilestonesExceeded ? "Cannot generate PDF: Milestones percentage exceeds 100%" : ""}
               >
                 <FileDown size={18} />
                 Prepare PDF
               </button>
             ) : (
-              <PDFDownloadLink
-                document={pdfDocument}
-                fileName={documentFileName}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition shadow-sm"
-              >
-                {({ loading, error }) => (
-                  <>
-                    <FileDown size={18} />
-                    {error ? `Error: ${error.message || 'Failed'}` : loading ? 'Preparing...' : 'Download Now'}
-                  </>
-                )}
-              </PDFDownloadLink>
+              isMilestonesExceeded ? (
+                <button
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-300 text-gray-500 text-sm font-medium rounded-lg cursor-not-allowed transition shadow-sm"
+                  disabled={true}
+                  title="Cannot generate PDF: Milestones percentage exceeds 100%"
+                >
+                  <FileDown size={18} />
+                  Download Now (Disabled)
+                </button>
+              ) : (
+                <PDFDownloadLink
+                  document={pdfDocument}
+                  fileName={documentFileName}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition shadow-sm"
+                >
+                  {({ loading, error }) => (
+                    <>
+                      <FileDown size={18} />
+                      {error ? `Error: ${error.message || 'Failed'}` : loading ? 'Preparing...' : 'Download Now'}
+                    </>
+                  )}
+                </PDFDownloadLink>
+              )
             )}
           </div>
         </div>
@@ -104,9 +122,7 @@ export function ProposalGenerator() {
             />
             <PricingPortfolio
               state={state}
-              addPortfolioLink={actions.addPortfolioLink}
-              updatePortfolioLink={actions.updatePortfolioLink}
-              removePortfolioLink={actions.removePortfolioLink}
+              updateField={actions.updateField}
             />
           </div>
 
@@ -149,25 +165,42 @@ export function ProposalGenerator() {
                   {activeGenerator !== 'sidebar' ? (
                     <button
                       onClick={() => { saveState(); setActiveGenerator('sidebar'); }}
-                      className={`inline-flex w-full justify-center items-center gap-2 px-5 py-3 ${activeGenerator === 'header' ? 'bg-gray-300 cursor-not-allowed text-gray-500' : 'bg-gray-900 hover:bg-gray-800 text-white'} text-sm font-medium rounded-lg transition shadow-sm`}
-                      disabled={activeGenerator === 'header'}
+                      className={`inline-flex w-full justify-center items-center gap-2 px-5 py-3 ${activeGenerator === 'header' || isMilestonesExceeded ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gray-900 hover:bg-gray-800 text-white'} text-sm font-medium rounded-lg transition shadow-sm`}
+                      disabled={activeGenerator === 'header' || isMilestonesExceeded}
+                      title={isMilestonesExceeded ? "Cannot generate PDF: Milestones percentage exceeds 100%" : ""}
                     >
                       <FileDown size={18} />
                       Generate Document
                     </button>
                   ) : (
-                    <PDFDownloadLink
-                      document={pdfDocument}
-                      fileName={documentFileName}
-                      className="inline-flex w-full justify-center items-center gap-2 px-5 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition shadow-sm"
-                    >
-                      {({ loading, error }) => (
-                        <>
-                          <FileDown size={18} />
-                          {error ? `Err: ${error.message || 'Failed'}` : loading ? 'Preparing Document...' : 'Download PDF Now'}
-                        </>
-                      )}
-                    </PDFDownloadLink>
+                    isMilestonesExceeded ? (
+                      <button
+                        className="inline-flex w-full justify-center items-center gap-2 px-5 py-3 bg-gray-300 text-gray-500 text-sm font-medium rounded-lg cursor-not-allowed transition shadow-sm"
+                        disabled={true}
+                        title="Cannot generate PDF: Milestones percentage exceeds 100%"
+                      >
+                        <FileDown size={18} />
+                        Download PDF (Disabled)
+                      </button>
+                    ) : (
+                      <PDFDownloadLink
+                        document={pdfDocument}
+                        fileName={documentFileName}
+                        className="inline-flex w-full justify-center items-center gap-2 px-5 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition shadow-sm"
+                      >
+                        {({ loading, error }) => (
+                          <>
+                            <FileDown size={18} />
+                            {error ? `Err: ${error.message || 'Failed'}` : loading ? 'Preparing Document...' : 'Download PDF Now'}
+                          </>
+                        )}
+                      </PDFDownloadLink>
+                    )
+                  )}
+                  {isMilestonesExceeded && (
+                    <p className="text-xs text-red-500 mt-2 font-medium">
+                      Milestones total percentage exceeds 100%. Please adjust before generating.
+                    </p>
                   )}
                   <p className="text-xs text-gray-500 mt-3">
                     Your data is securely saved in your browser.

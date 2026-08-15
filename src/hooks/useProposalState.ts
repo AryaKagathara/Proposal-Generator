@@ -59,6 +59,7 @@ export type ProposalState = {
   categoryTimelines: Record<string, string>; // e.g. { "logo-identity": "2 Weeks" }
   paymentMilestones: PaymentMilestone[];
   portfolioLinks: PortfolioLink[];
+  portfolioRawText: string;
   totalPrice: string;
   currency: string;
   customScopeContent: string;
@@ -84,6 +85,7 @@ const defaultState: ProposalState = {
     { id: "ms-final", name: "Final Delivery", percentage: "50" }
   ],
   portfolioLinks: [],
+  portfolioRawText: "",
   totalPrice: "",
   currency: "USD",
   customScopeContent: "",
@@ -114,6 +116,9 @@ export function useProposalState() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
+        if (parsed.portfolioLinks && parsed.portfolioLinks.length > 0 && !parsed.portfolioRawText) {
+          parsed.portfolioRawText = parsed.portfolioLinks.map((link: any) => `${link.name}\n${link.url}`).join("\n\n");
+        }
         if (!parsed.phases) {
           parsed.phases = [
             {
@@ -139,7 +144,34 @@ export function useProposalState() {
   };
 
   const updateField = <K extends keyof ProposalState>(key: K, value: ProposalState[K]) => {
-    setState((prev) => ({ ...prev, [key]: value }));
+    setState((prev) => {
+      const nextState = { ...prev, [key]: value };
+      if (key === "portfolioRawText") {
+        const text = value as string;
+        const blocks = text.split(/\n\s*\n/);
+        const newLinks = blocks
+          .map((block) => {
+            const lines = block.split('\n').map(line => line.trim()).filter(Boolean);
+            if (lines.length >= 2) {
+              return {
+                id: Math.random().toString(36).substr(2, 9),
+                name: lines[0],
+                url: lines[1]
+              };
+            } else if (lines.length === 1) {
+              return {
+                id: Math.random().toString(36).substr(2, 9),
+                name: lines[0],
+                url: ""
+              };
+            }
+            return null;
+          })
+          .filter((link): link is PortfolioLink => link !== null);
+        nextState.portfolioLinks = newLinks;
+      }
+      return nextState;
+    });
   };
 
   const addScopeItem = (item: SelectedScopeItem) => {

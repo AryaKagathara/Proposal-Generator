@@ -17,6 +17,7 @@ Font.register({
     { src: getFontPath('/fonts/GoogleSans-Bold.ttf'), fontWeight: 'bold' }
   ]
 });
+Font.registerHyphenationCallback((word) => [word]);
 import { ProposalState, getCurrencySymbol } from '@/hooks/useProposalState';
 import { SERVICES_DATA } from '@/data/services';
 
@@ -47,6 +48,11 @@ const cleanText = (str: string | undefined | null) => {
   cleaned = cleaned.replace(/[\u{1F300}-\u{1F5FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE0F}\u{200D}]/gu, '');
 
   return cleaned;
+};
+
+const wrapUrl = (str: string) => {
+  if (!str) return '';
+  return str.replace(/([\/._?=&+-])/g, '$1\u200B');
 };
 
 const renderCustomText = (text: string, styles: any) => {
@@ -104,16 +110,16 @@ const styles = StyleSheet.create({
   },
   titlePrimary: { fontSize: 38, fontWeight: 'bold', marginBottom: 10, color: '#F35423' },
   titleSecondary: { fontSize: 24, fontWeight: 'bold', marginBottom: 40, color: '#000000' },
-  coverDetail: { fontSize: 11, color: '#000000', marginBottom: 4, lineHeight: 1.4 },
+  coverDetail: { fontSize: 11, color: '#000000', marginBottom: 4, lineHeight: 1.5 },
   header: { fontSize: 20, fontWeight: 'bold', marginBottom: 16, color: '#F35423', borderBottomWidth: 1.5, borderBottomColor: '#F35423', paddingBottom: 8 },
   section: { marginBottom: 20 },
-  subHeader: { fontSize: 14, fontWeight: 'bold', color: '#000000', marginBottom: 8, marginTop: 12 },
-  text: { fontSize: 11, lineHeight: 1.6, color: '#000000', marginBottom: 8 },
+  subHeader: { fontSize: 14, fontWeight: 'bold', color: '#000000', marginBottom: 8, marginTop: 12, lineHeight: 1.3 },
+  text: { fontSize: 11, lineHeight: 1.6, color: '#000000', marginBottom: 8, textAlign: 'justify' },
   listItem: { flexDirection: 'row', marginBottom: 6 },
   bullet: { width: 15, fontSize: 11, color: '#F35423' },
   listItemContent: { flex: 1 },
-  listItemTitle: { fontSize: 11, fontWeight: 'bold', color: '#000000' },
-  listItemDesc: { fontSize: 9.5, color: '#000000', marginTop: 2 },
+  listItemTitle: { fontSize: 11, fontWeight: 'bold', color: '#000000', lineHeight: 1.4 },
+  listItemDesc: { fontSize: 9.5, color: '#000000', marginTop: 2, lineHeight: 1.4 },
   table: { display: 'flex', flexDirection: 'column', width: 'auto', marginTop: 10, borderWidth: 1, borderColor: '#E5E7EB' },
   tableRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
   tableHeader: { backgroundColor: '#FEECE8' }, // Light peach tint for table headers
@@ -122,7 +128,7 @@ const styles = StyleSheet.create({
   phaseColName: { width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' },
   phaseColDuration: { width: '20%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' },
   phaseColDeliverables: { width: '50%', padding: 8 },
-  tableCellHeader: { fontSize: 9.5, fontWeight: 'bold', color: '#000000' },
+  tableCellHeader: { fontSize: 9.5, fontWeight: 'bold', color: '#000000', lineHeight: 1.4 },
   tableCell: { fontSize: 9.5, lineHeight: 1.4, color: '#000000' },
   link: { fontSize: 9.5, color: '#F35423', textDecoration: 'none' },
   footerContainer: {
@@ -356,45 +362,202 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
           </>
         )}
 
+        {state.isPreliminaryQuote && (
+          <View style={{ marginTop: 10, marginBottom: 5 }}>
+            <Text style={[styles.text, { color: '#F35423', fontWeight: 'bold', fontSize: 9.5 }]}>
+              Note: This Quote will be confirmed after a video meeting and complete briefing and then final quotation will be given.
+            </Text>
+          </View>
+        )}
+
         <Text style={[styles.subHeader]}>Payment Mode</Text>
         <View style={styles.section}>
-          <Text style={styles.text}>1. Bank to Bank</Text>
-          <Text style={styles.text}>2. Payoneer, Wise or other Payment Gateways....</Text>
+          <Text style={styles.text}>Bank to Bank, Payoneer, Wise, Dribbble, Behance, Upwork</Text>
           <Text style={styles.text}>Note: Whichever is the best for the client and us to get the money fast at lower exchange rates.</Text>
-          <Text style={styles.text}>3. Cash if nearby location</Text>
         </View>
 
         {renderFooter()}
       </Page>
 
-      {state.portfolioLinks.length > 0 && (
-        <Page size="A4" style={styles.page}>
-          <Text style={styles.header}>Portfolio References</Text>
-          <View style={styles.table}>
-            <View style={[styles.tableRow, styles.tableHeader]}>
-              <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Project Name</Text></View>
-              <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Reference Link</Text></View>
-            </View>
-            {state.portfolioLinks.map((link, idx) => {
-              const url = link.url ? link.url.trim() : '';
-              const validUrl = (!url || url.startsWith('http')) ? url : `https://${url}`;
-              return (
-                <View key={idx} style={styles.tableRow} wrap={false}>
-                  <View style={styles.tableColHalf}><Text style={styles.tableCell}>{cleanText(link.name)}</Text></View>
-                  <View style={styles.tableColHalf}>
-                    {validUrl ? (
-                      <Link src={validUrl} style={styles.link}>{cleanText(url)}</Link>
-                    ) : (
-                      <Text style={styles.tableCell}>{cleanText(url) || "-"}</Text>
-                    )}
+      <Page size="A4" style={styles.page}>
+        {state.portfolioLinks.length > 0 && (
+          <>
+            <Text style={styles.header}>Portfolio References</Text>
+            <View style={[styles.table, { marginBottom: 20 }]}>
+              <View style={[styles.tableRow, styles.tableHeader]}>
+                <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Project Name</Text></View>
+                <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Reference Link</Text></View>
+              </View>
+              {state.portfolioLinks.map((link, idx) => {
+                const url = link.url ? link.url.trim() : '';
+                const validUrl = (!url || url.startsWith('http')) ? url : `https://${url}`;
+                return (
+                  <View key={idx} style={styles.tableRow} wrap={false}>
+                    <View style={styles.tableColHalf}><Text style={styles.tableCell}>{cleanText(link.name)}</Text></View>
+                    <View style={styles.tableColHalf}>
+                      {validUrl ? (
+                        <Link src={validUrl} style={styles.link}>{wrapUrl(cleanText(url))}</Link>
+                      ) : (
+                        <Text style={styles.tableCell}>{wrapUrl(cleanText(url)) || "-"}</Text>
+                      )}
+                    </View>
                   </View>
-                </View>
-              );
-            })}
+                );
+              })}
+            </View>
+          </>
+        )}
+
+        <Text style={state.portfolioLinks.length > 0 ? [styles.subHeader, { marginTop: 10 }] : styles.header}>Tools We Use</Text>
+        <View style={styles.table}>
+          <View style={[styles.tableRow, styles.tableHeader]}>
+            <View style={{ width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+              <Text style={styles.tableCellHeader}>Category</Text>
+            </View>
+            <View style={{ width: '70%', padding: 8 }}>
+              <Text style={styles.tableCellHeader}>Tools / Frameworks / Databases</Text>
+            </View>
           </View>
-          {renderFooter()}
-        </Page>
-      )}
+
+          <View style={styles.tableRow} wrap={false}>
+            <View style={{ width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+              <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Design</Text>
+            </View>
+            <View style={{ width: '70%', padding: 8 }}>
+              <Text style={styles.tableCell}>Figma, Photoshop, Illustrator, Canva</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow} wrap={false}>
+            <View style={{ width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+              <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Frontend Web Dev</Text>
+            </View>
+            <View style={{ width: '70%', padding: 8 }}>
+              <Text style={styles.tableCell}>HTML, CSS, JS, ReactJS, NextJS, VueJS, Tailwind CSS</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow} wrap={false}>
+            <View style={{ width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+              <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Backend Web Dev</Text>
+            </View>
+            <View style={{ width: '70%', padding: 8 }}>
+              <Text style={styles.tableCell}>PHP WordPress-WooCommerce, Shopify, Laravel, Python Django, NodeJS, Express</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow} wrap={false}>
+            <View style={{ width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+              <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Databases</Text>
+            </View>
+            <View style={{ width: '70%', padding: 8 }}>
+              <Text style={styles.tableCell}>MySQL, MongoDB, PostgreSQL, Redis</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow} wrap={false}>
+            <View style={{ width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+              <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Video Meeting</Text>
+            </View>
+            <View style={{ width: '70%', padding: 8 }}>
+              <Text style={styles.tableCell}>Google Meet, Zoom, Microsoft Teams</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow} wrap={false}>
+            <View style={{ width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+              <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Project Management</Text>
+            </View>
+            <View style={{ width: '70%', padding: 8 }}>
+              <Text style={styles.tableCell}>Jira, Trello, ClickUp, Asana, Notion</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow} wrap={false}>
+            <View style={{ width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+              <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Communication</Text>
+            </View>
+            <View style={{ width: '70%', padding: 8 }}>
+              <Text style={styles.tableCell}>Email, Google Chat, Microsoft Teams</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow} wrap={false}>
+            <View style={{ width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+              <Text style={[styles.tableCell, { fontWeight: 'bold' }]}>Cloud & DevOps</Text>
+            </View>
+            <View style={{ width: '70%', padding: 8 }}>
+              <Text style={styles.tableCell}>Hostinger, AWS, Google Cloud Platform (GCP), Vercel, Netlify, Docker, GitHub</Text>
+            </View>
+          </View>
+        </View>
+
+        {renderFooter()}
+      </Page>
+
+      {/* Page: Why Work With Us */}
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.header}>Key Services & Why Us</Text>
+        <View style={{ gap: 10, marginTop: 10 }}>
+          <View style={{ flexDirection: 'row', marginBottom: 10 }} wrap={false}>
+            <View style={{ width: 5, height: 5, backgroundColor: '#F35423', marginTop: 5, marginRight: 10 }} />
+            <Text style={[styles.text, { flex: 1, marginBottom: 0 }]}>
+              <Text style={{ fontWeight: 'bold', color: '#F35423' }}>Custom Design: </Text>
+              I do custom design only for you, every project is unique, and design should fit goals, not look like everyone else's.
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', marginBottom: 10 }} wrap={false}>
+            <View style={{ width: 5, height: 5, backgroundColor: '#F35423', marginTop: 5, marginRight: 10 }} />
+            <Text style={[styles.text, { flex: 1, marginBottom: 0 }]}>
+              <Text style={{ fontWeight: 'bold', color: '#F35423' }}>Clear Timeline: </Text>
+              Clear timeline and delivery dates, clear deadlines keep the project focused.
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', marginBottom: 10 }} wrap={false}>
+            <View style={{ width: 5, height: 5, backgroundColor: '#F35423', marginTop: 5, marginRight: 10 }} />
+            <Text style={[styles.text, { flex: 1, marginBottom: 0 }]}>
+              <Text style={{ fontWeight: 'bold', color: '#F35423' }}>Quick Onboarding: </Text>
+              Ready to start in 1-2 days, great ideas takes some time to get out of the box.
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', marginBottom: 10 }} wrap={false}>
+            <View style={{ width: 5, height: 5, backgroundColor: '#F35423', marginTop: 5, marginRight: 10 }} />
+            <Text style={[styles.text, { flex: 1, marginBottom: 0 }]}>
+              <Text style={{ fontWeight: 'bold', color: '#F35423' }}>Fixed Pricing: </Text>
+              Fixed pricing with milestone payments, we both want Transparency and not surprises.
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', marginBottom: 10 }} wrap={false}>
+            <View style={{ width: 5, height: 5, backgroundColor: '#F35423', marginTop: 5, marginRight: 10 }} />
+            <Text style={[styles.text, { flex: 1, marginBottom: 0 }]}>
+              <Text style={{ fontWeight: 'bold', color: '#F35423' }}>Full File Ownership: </Text>
+              Full ownership of [design, source, final, code, etc.] files, it belongs to you.
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', marginBottom: 10 }} wrap={false}>
+            <View style={{ width: 5, height: 5, backgroundColor: '#F35423', marginTop: 5, marginRight: 10 }} />
+            <Text style={[styles.text, { flex: 1, marginBottom: 0 }]}>
+              <Text style={{ fontWeight: 'bold', color: '#F35423' }}>Regular Updates: </Text>
+              Regular progress updates and meetings, the best results come from sharing ideas.
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', marginBottom: 10 }} wrap={false}>
+            <View style={{ width: 5, height: 5, backgroundColor: '#F35423', marginTop: 5, marginRight: 10 }} />
+            <Text style={[styles.text, { flex: 1, marginBottom: 0 }]}>
+              <Text style={{ fontWeight: 'bold', color: '#F35423' }}>Step-by-Step Completion: </Text>
+              Step-by-step project completion, great projects are built one step at a time.
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', marginBottom: 10 }} wrap={false}>
+            <View style={{ width: 5, height: 5, backgroundColor: '#F35423', marginTop: 5, marginRight: 10 }} />
+            <Text style={[styles.text, { flex: 1, marginBottom: 0 }]}>
+              <Text style={{ fontWeight: 'bold', color: '#F35423' }}>Long-Term Support: </Text>
+              Long-term support whenever you need it, you shouldn't be left on your own after it completes.
+            </Text>
+          </View>
+        </View>
+        {renderFooter()}
+      </Page>
 
       {/* Page 5: Terms & Approval */}
       <Page size="A4" style={styles.page}>
@@ -427,9 +590,23 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
           <Text style={[styles.header, { borderBottomWidth: 0, paddingBottom: 0, fontSize: 15, marginBottom: 10 }]}>Authority Signature</Text>
           <Image src={origin ? `${origin}/Signature.jpg` : "/Signature.jpg"} style={{ width: 140, height: 45, objectFit: 'contain', marginBottom: 5 }} />
           <View>
-            <Text style={[styles.text, { fontWeight: 'bold', color: '#000000', fontSize: 11, marginBottom: 2 }]}>Unique Encrypted Digital Signature</Text>
-            <Text style={{ fontSize: 7.5, color: '#000000' }}>
-              {("SIGNED-0f434ae6eb545f612a672c945cf217c6eaebe00c1aa5e3ecf2e969df14f10429db953d0f8c2ab8d5b384edd2b71dc15f61fea0feb4d247184e86b752506fc6317c89d7b503ae1dc822d4ef2f1230df0e7c7effae26945ac88ff69d4cc9a3d05ac88ed54a6cc22647e0ea769c6d8574bcde745bf6c0afe6a006967d31f592ecf6daaeec7b45270f0a4489799924db015d46ab8682113f190b5ab307d099b2".match(/.{1,60}/g) || []).join('\n')}
+            <Text style={[styles.text, { fontWeight: 'bold', color: '#000000', fontSize: 9, marginBottom: 2 }]}>Unique Encrypted Digital Signature</Text>
+            <Text style={{ fontSize: 6, color: '#000000', marginBottom: 4 }}>
+              {("SIGNED-0f434ae6eb545f612a672c945cf217c6eaebe00c1aa5e3ecf2e969df14f10429db953d0f8c2ab8d5b384edd2b71dc15f61fea0feb4d247184e86b752506fc6317c89d7b503ae1dc822d4ef2f1230df0e7c7effae26945ac88ff69d4cc9a3d05ac88ed54a6cc22647e0ea769c6d8574bcde745bf6c0afe6a006967d31f592ecdt".match(/.{1,60}/g) || []).join('\n')}
+              {(() => {
+                const date = state.projectDate ? new Date(state.projectDate) : new Date();
+                const now = new Date();
+                if (state.projectDate) {
+                  date.setHours(now.getHours());
+                  date.setMinutes(now.getMinutes());
+                }
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = String(date.getFullYear());
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${day}${month}${year}${hours}${minutes}`;
+              })()}IST
             </Text>
           </View>
         </View>

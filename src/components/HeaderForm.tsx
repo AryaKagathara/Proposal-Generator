@@ -56,7 +56,7 @@ export function HeaderForm({
       </div>
 
       <div className="pt-3 border-t border-gray-100 space-y-3">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3">
           <input
             type="checkbox"
             id="isPreliminaryQuote"
