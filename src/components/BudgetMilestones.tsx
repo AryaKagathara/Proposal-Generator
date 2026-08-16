@@ -50,11 +50,10 @@ export function BudgetMilestones({
             <button
               type="button"
               onClick={() => updateField("pricingType", "fixed")}
-              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium transition ${
-                !isHourly
+              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium transition ${!isHourly
                   ? "bg-white text-blue-600 shadow-sm font-semibold"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
+                }`}
             >
               <DollarSign size={15} />
               Fixed Price Quote
@@ -62,11 +61,10 @@ export function BudgetMilestones({
             <button
               type="button"
               onClick={() => updateField("pricingType", "hourly")}
-              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium transition ${
-                isHourly
+              className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium transition ${isHourly
                   ? "bg-white text-blue-600 shadow-sm font-semibold"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
+                }`}
             >
               <Clock size={15} />
               Hourly Rate
@@ -203,11 +201,10 @@ export function BudgetMilestones({
                             onChange={(e) =>
                               updateMilestone(ms.id, "percentage", e.target.value)
                             }
-                            className={`w-full pl-2 pr-5 py-1.5 text-xs border ${
-                              isOverBudget
+                            className={`w-full pl-2 pr-5 py-1.5 text-xs border ${isOverBudget
                                 ? "border-red-500 focus:ring-red-500"
                                 : "border-gray-300 focus:ring-blue-500"
-                            } rounded-md focus:outline-none focus:ring-2 bg-white`}
+                              } rounded-md focus:outline-none focus:ring-2 bg-white`}
                             placeholder="0"
                           />
                           <span className="absolute right-1.5 top-1.5 text-gray-500 text-xs">
@@ -240,13 +237,12 @@ export function BudgetMilestones({
                   <div className="flex items-center justify-between text-xs pt-1 px-1 text-gray-500">
                     <span>Total Allocated:</span>
                     <span
-                      className={`font-semibold ${
-                        isOverBudget
+                      className={`font-semibold ${isOverBudget
                           ? "text-red-600"
                           : currentTotalPercent === 100
-                          ? "text-green-600"
-                          : "text-gray-700"
-                      }`}
+                            ? "text-green-600"
+                            : "text-gray-700"
+                        }`}
                     >
                       {currentTotalPercent}%
                     </span>
