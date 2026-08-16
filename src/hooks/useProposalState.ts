@@ -57,6 +57,9 @@ export type ProposalState = {
   projectDetails: string;
   selectedScope: SelectedScopeItem[];
   categoryTimelines: Record<string, string>; // e.g. { "logo-identity": "2 Weeks" }
+  pricingType?: 'fixed' | 'hourly';
+  hourlyRate?: string;
+  estimatedHours?: string;
   paymentMilestones: PaymentMilestone[];
   portfolioLinks: PortfolioLink[];
   portfolioRawText: string;
@@ -80,6 +83,9 @@ const defaultState: ProposalState = {
   projectDetails: "",
   selectedScope: [],
   categoryTimelines: {},
+  pricingType: "fixed",
+  hourlyRate: "",
+  estimatedHours: "",
   paymentMilestones: [
     { id: "ms-1", name: "Advance", percentage: "50" },
     { id: "ms-final", name: "Final Delivery", percentage: "50" }
@@ -116,22 +122,14 @@ export function useProposalState() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (parsed.portfolioLinks && parsed.portfolioLinks.length > 0 && !parsed.portfolioRawText) {
-          parsed.portfolioRawText = parsed.portfolioLinks.map((link: any) => `${link.name}\n${link.url}`).join("\n\n");
+        const mergedState: ProposalState = { ...defaultState, ...parsed };
+        if (mergedState.portfolioLinks && mergedState.portfolioLinks.length > 0 && !mergedState.portfolioRawText) {
+          mergedState.portfolioRawText = mergedState.portfolioLinks.map((link: any) => `${link.name}\n${link.url}`).join("\n\n");
         }
-        if (!parsed.phases) {
-          parsed.phases = [
-            {
-              id: "phase-1",
-              name: "Discovery & Design",
-              duration: "2 Weeks",
-              deliverables: [
-                { id: "del-1-1", label: "Wireframes & Mockups", description: "Design layouts and interactive prototype of the key screens." }
-              ]
-            }
-          ];
+        if (!mergedState.phases || mergedState.phases.length === 0) {
+          mergedState.phases = defaultState.phases;
         }
-        setState(parsed);
+        setState(mergedState);
       } catch (e) {
         console.error("Failed to parse stored state.");
       }
@@ -357,6 +355,10 @@ export function useProposalState() {
       const next = { ...prev };
       if (data.clientName !== undefined) next.clientName = data.clientName;
       if (data.totalPrice !== undefined) next.totalPrice = data.totalPrice;
+      if (data.pricingType !== undefined) next.pricingType = data.pricingType;
+      if (data.hourlyRate !== undefined) next.hourlyRate = data.hourlyRate;
+      if (data.estimatedHours !== undefined) next.estimatedHours = data.estimatedHours;
+      if (data.hideMilestones !== undefined) next.hideMilestones = data.hideMilestones;
       if (data.customScopeContent !== undefined) next.customScopeContent = data.customScopeContent;
       if (data.phases !== undefined) {
         next.phases = data.phases.map((p) => ({

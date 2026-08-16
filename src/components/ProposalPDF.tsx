@@ -330,37 +330,137 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
       <Page size="A4" style={styles.page}>
         <Text style={styles.header}>Financial Investment</Text>
 
-        {!state.hideMilestones && (
-          <>
-            <Text style={[styles.subHeader]}>Payment Milestones</Text>
-            <View style={[styles.table, { marginTop: 5 }]}>
-              <View style={[styles.tableRow, styles.tableHeader]}>
-                <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Phase</Text></View>
-                <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Percentage</Text></View>
-                <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Amount ({getCurrencySymbol(state.currency || 'USD', true).trim()})</Text></View>
-              </View>
-              {state.paymentMilestones.map((ms) => {
-                const perc = parseFloat(ms.percentage) || 0;
-                const calcAmount = totalBudget * (perc / 100);
-                return (
-                  <View key={ms.id} style={styles.tableRow} wrap={false}>
-                    <View style={styles.tableColThird}><Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423' }]}>{cleanText(ms.name)}</Text></View>
-                    <View style={styles.tableColThird}><Text style={styles.tableCell}>{ms.percentage}%</Text></View>
-                    <View style={styles.tableColThird}><Text style={styles.tableCell}>{currencySymbol}{calcAmount.toFixed(2)}</Text></View>
+        {(() => {
+          const isHourly = state.pricingType === 'hourly';
+          const hourlyRateNum = parseFloat(state.hourlyRate || '0');
+          const estimatedHoursNum = parseFloat(state.estimatedHours || '0');
+          const hasCalculatedHourlyTotal = !isNaN(hourlyRateNum) && !isNaN(estimatedHoursNum) && estimatedHoursNum > 0 && hourlyRateNum > 0;
+          const hourlyEstimatedTotal = hasCalculatedHourlyTotal ? hourlyRateNum * estimatedHoursNum : 0;
+
+          if (isHourly) {
+            return (
+              <>
+                <Text style={[styles.subHeader]}>Hourly Engagement Model</Text>
+                <View style={[styles.table, { marginTop: 5, marginBottom: 12 }]}>
+                  <View style={[styles.tableRow, styles.tableHeader]}>
+                    <View style={state.estimatedHours ? { width: '40%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' } : { width: '50%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+                      <Text style={styles.tableCellHeader}>Engagement Structure</Text>
+                    </View>
+                    <View style={state.estimatedHours ? { width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' } : { width: '50%', padding: 8 }}>
+                      <Text style={styles.tableCellHeader}>Hourly Rate</Text>
+                    </View>
+                    {state.estimatedHours ? (
+                      <View style={{ width: '30%', padding: 8 }}>
+                        <Text style={styles.tableCellHeader}>Estimated Hours</Text>
+                      </View>
+                    ) : null}
                   </View>
-                )
-              })}
-              <View style={[styles.tableRow, { backgroundColor: '#FEECE8' }]} wrap={false}>
-                <View style={{ width: '66.66%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
-                  <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423', fontSize: 12 }]}>Grand Total</Text>
+
+                  <View style={styles.tableRow} wrap={false}>
+                    <View style={state.estimatedHours ? { width: '40%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' } : { width: '50%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+                      <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423' }]}>Dedicated Hourly Work</Text>
+                      <Text style={[styles.tableCell, { fontSize: 8.5, color: '#4B5563', marginTop: 2 }]}>
+                        Time tracked accurately for all design, development, and revision activities.
+                      </Text>
+                    </View>
+                    <View style={state.estimatedHours ? { width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' } : { width: '50%', padding: 8 }}>
+                      <Text style={[styles.tableCell, { fontWeight: 'bold', fontSize: 10 }]}>
+                        {currencySymbol}{cleanText(state.hourlyRate || '0')} / hr
+                      </Text>
+                    </View>
+                    {state.estimatedHours ? (
+                      <View style={{ width: '30%', padding: 8 }}>
+                        <Text style={[styles.tableCell, { fontSize: 10 }]}>{cleanText(state.estimatedHours)}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+
+                  {hasCalculatedHourlyTotal && (
+                    <View style={[styles.tableRow, { backgroundColor: '#FEECE8' }]} wrap={false}>
+                      <View style={{ width: '70%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+                        <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423', fontSize: 11 }]}>Estimated Total Investment</Text>
+                      </View>
+                      <View style={{ width: '30%', padding: 8 }}>
+                        <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423', fontSize: 11 }]}>
+                          {currencySymbol}{hourlyEstimatedTotal.toFixed(2)}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
                 </View>
-                <View style={{ width: '33.33%', padding: 8 }}>
-                  <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423', fontSize: 12 }]}>{currencySymbol}{totalBudget.toFixed(2)}</Text>
+              </>
+            );
+          }
+
+          if (!state.hideMilestones) {
+            return (
+              <>
+                <Text style={[styles.subHeader]}>Payment Milestones</Text>
+                <View style={[styles.table, { marginTop: 5, marginBottom: 12 }]}>
+                  <View style={[styles.tableRow, styles.tableHeader]}>
+                    <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Phase</Text></View>
+                    <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Percentage</Text></View>
+                    <View style={styles.tableColThird}><Text style={styles.tableCellHeader}>Amount ({getCurrencySymbol(state.currency || 'USD', true).trim()})</Text></View>
+                  </View>
+                  {state.paymentMilestones.map((ms) => {
+                    const perc = parseFloat(ms.percentage) || 0;
+                    const calcAmount = totalBudget * (perc / 100);
+                    return (
+                      <View key={ms.id} style={styles.tableRow} wrap={false}>
+                        <View style={styles.tableColThird}><Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423' }]}>{cleanText(ms.name)}</Text></View>
+                        <View style={styles.tableColThird}><Text style={styles.tableCell}>{ms.percentage}%</Text></View>
+                        <View style={styles.tableColThird}><Text style={styles.tableCell}>{currencySymbol}{calcAmount.toFixed(2)}</Text></View>
+                      </View>
+                    );
+                  })}
+                  <View style={[styles.tableRow, { backgroundColor: '#FEECE8' }]} wrap={false}>
+                    <View style={{ width: '66.66%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+                      <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423', fontSize: 12 }]}>Grand Total</Text>
+                    </View>
+                    <View style={{ width: '33.33%', padding: 8 }}>
+                      <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423', fontSize: 12 }]}>{currencySymbol}{totalBudget.toFixed(2)}</Text>
+                    </View>
+                  </View>
+                </View>
+              </>
+            );
+          }
+
+          return (
+            <>
+              <Text style={[styles.subHeader]}>Project Quotation (Fixed Price)</Text>
+              <View style={[styles.table, { marginTop: 5, marginBottom: 12 }]}>
+                <View style={[styles.tableRow, styles.tableHeader]}>
+                  <View style={{ width: '66.66%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+                    <Text style={styles.tableCellHeader}>Scope / Deliverables</Text>
+                  </View>
+                  <View style={{ width: '33.33%', padding: 8 }}>
+                    <Text style={styles.tableCellHeader}>Total Investment ({getCurrencySymbol(state.currency || 'USD', true).trim()})</Text>
+                  </View>
+                </View>
+                <View style={styles.tableRow} wrap={false}>
+                  <View style={{ width: '66.66%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423' }]}>Complete Project Scope & Deliverables</Text>
+                    <Text style={[styles.tableCell, { fontSize: 8.5, color: '#4B5563', marginTop: 2 }]}>
+                      Fixed-price investment covering all phases, design, development, and deliverables outlined in this proposal.
+                    </Text>
+                  </View>
+                  <View style={{ width: '33.33%', padding: 8 }}>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold', fontSize: 11 }]}>{currencySymbol}{totalBudget.toFixed(2)}</Text>
+                  </View>
+                </View>
+                <View style={[styles.tableRow, { backgroundColor: '#FEECE8' }]} wrap={false}>
+                  <View style={{ width: '66.66%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423', fontSize: 12 }]}>Total Fixed Quote</Text>
+                  </View>
+                  <View style={{ width: '33.33%', padding: 8 }}>
+                    <Text style={[styles.tableCell, { fontWeight: 'bold', color: '#F35423', fontSize: 12 }]}>{currencySymbol}{totalBudget.toFixed(2)}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          </>
-        )}
+            </>
+          );
+        })()}
 
         {state.isPreliminaryQuote && (
           <View style={{ marginTop: 10, marginBottom: 5 }}>

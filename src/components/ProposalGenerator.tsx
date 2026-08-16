@@ -34,10 +34,11 @@ export function ProposalGenerator() {
   }, [state.isPreliminaryQuote, state.clientName, state.projectDate]);
 
   const isMilestonesExceeded = useMemo(() => {
+    if (state.pricingType === 'hourly') return false;
     if (state.hideMilestones) return false;
     const currentTotalPercent = state.paymentMilestones.reduce((acc, ms) => acc + (parseFloat(ms.percentage) || 0), 0);
     return currentTotalPercent > 100;
-  }, [state.paymentMilestones, state.hideMilestones]);
+  }, [state.pricingType, state.paymentMilestones, state.hideMilestones]);
 
   useEffect(() => {
     setIsClient(true);
@@ -157,18 +158,43 @@ export function ProposalGenerator() {
                     <span className="text-gray-500">Scope Items:</span>
                     <span className="font-medium text-blue-600">{state.selectedScope.length}</span>
                   </div>
-                  {!state.hideMilestones && (
-                    <div className="flex justify-between border-b border-gray-100 pb-2">
-                      <span className="text-gray-500">Milestones:</span>
-                      <span className="font-medium text-gray-800">{state.paymentMilestones.length}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between pt-2">
-                    <span className="text-gray-500 font-medium">Total Cost:</span>
-                    <span className="font-bold text-gray-900 text-lg">
-                      {getCurrencySymbol(state.currency)}{state.totalPrice || '0'}
+                  <div className="flex justify-between border-b border-gray-100 pb-2">
+                    <span className="text-gray-500">Pricing Model:</span>
+                    <span className="font-medium text-gray-800">
+                      {state.pricingType === 'hourly' ? 'Hourly Rate' : 'Fixed Price'}
                     </span>
                   </div>
+                  {state.pricingType === 'hourly' ? (
+                    <>
+                      {state.estimatedHours && (
+                        <div className="flex justify-between border-b border-gray-100 pb-2">
+                          <span className="text-gray-500">Est. Hours:</span>
+                          <span className="font-medium text-gray-800">{state.estimatedHours}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between pt-2">
+                        <span className="text-gray-500 font-medium">Hourly Rate:</span>
+                        <span className="font-bold text-gray-900 text-lg">
+                          {getCurrencySymbol(state.currency)}{state.hourlyRate || '0'}/hr
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="text-gray-500">Milestones:</span>
+                        <span className="font-medium text-gray-800">
+                          {state.hideMilestones ? 'Skipped (Fixed Quote)' : `${state.paymentMilestones.length} staged`}
+                        </span>
+                      </div>
+                      <div className="flex justify-between pt-2">
+                        <span className="text-gray-500 font-medium">Total Fixed Cost:</span>
+                        <span className="font-bold text-gray-900 text-lg">
+                          {getCurrencySymbol(state.currency)}{state.totalPrice || '0'}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-gray-100 text-center">
