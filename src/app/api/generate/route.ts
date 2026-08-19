@@ -34,6 +34,7 @@ Your goal is to extract and generate structured proposal content to fit a specif
 Here is the JSON schema you must return:
 {
   "clientName": "Client Name or Company (or empty string if not found)",
+  "projectDetails": "The formatted Client Job Description. MUST preserve all original text, scope, links, and requirements verbatim without altering, omitting, summarizing, or modifying any content, but formatted with clean paragraphs and bullet points.",
   "totalPrice": "Estimated project budget/amount as a string (number only, e.g. '1200' or '3500'. If not specified in JD or proposal, estimate a reasonable price based on the work, or default to '1500')",
   "phases": [
     {
@@ -60,21 +61,24 @@ Here is the JSON schema you must return:
       "url": "Reference Link URL"
     }
   ],
-  "previewText": "A clean, beautiful Markdown preview representing the generated proposal content in normal text. Do not show the JSON structure here. Make it clean, readable, and structured for the user to preview. Summarize the Client Name, Phases, Budget, Milestones, and Portfolio."
+  "previewText": "A clean, beautiful Markdown preview representing the generated proposal content in normal text. Do not show the JSON structure here. Make it clean, readable, and structured for the user to preview. Summarize the Client Name, Project Requirements / Details, Phases, Budget, Milestones, and Portfolio."
 }
 
 Rules for generating the content:
 1. CLIENT NAME: Extract the client/company name from the JD or proposal. If not found, leave as empty string "".
-2. PHASES: Create logical project phases based on the JD requirements. Each phase must have a title, timeline (e.g., '2 Weeks'), and deliverables. Each deliverable must have a title and a 1-sentence description.
-3. BUDGET: Extract the budget from the JD or proposal. Return only the numeric amount as a string (e.g. '1200').
-4. MILESTONES:
+2. PROJECT REQUIREMENTS / DETAILS:
+   - Take the exact CLIENT JOB DESCRIPTION provided by the client and format it cleanly with proper spacing, readable paragraphs, and bullet points where appropriate (e.g. using '-' for bullet items).
+   - CRITICAL REQUIREMENT: Do NOT change, rewrite, summarize, or omit any content, wording, requirements, links, or specifications from the Client Job Description. Keep all original sentences and requirements intact and verbatim so that in the event of any client dispute, it serves as an authentic, exact record of what the client originally asked for.
+3. PHASES: Create logical project phases based on the JD requirements. Each phase must have a title, timeline (e.g., '2 Weeks'), and deliverables. Each deliverable must have a title and a 1-sentence description.
+4. BUDGET: Extract the budget from the JD or proposal. Return only the numeric amount as a string (e.g. '1200').
+5. MILESTONES:
    - If the totalPrice is under USD 1500, the Advance payment milestone must be 50%.
    - If the totalPrice is USD 1500 or more, the Advance payment milestone must be 20%.
    - The final handoff/deployment phase milestone must be 5%.
    - If Phase 1 is Strategy & Research (or similar setup/discovery phase), combine/consider it as part of the Advance milestone.
    - Distribute the remaining percentage logically among the intermediate phases/milestones. All milestone percentages must sum up to exactly 100%.
-5. CUSTOM SCOPE: List any additional notes, assumptions, or future scope details, and end with a comma-separated list of all deliverables.
-6. PORTFOLIO LINKS: Extract any portfolio names and links mentioned in the user's proposal or JD. If none are found, return an empty array.
+6. CUSTOM SCOPE: List any additional notes, assumptions, or future scope details, and end with a comma-separated list of all deliverables.
+7. PORTFOLIO LINKS: Extract any portfolio names and links mentioned in the user's proposal or JD. If none are found, return an empty array.
 
 Return ONLY a valid JSON object matching this schema. Do not enclose it in markdown blocks except returning json format.
 `;

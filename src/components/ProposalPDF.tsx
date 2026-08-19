@@ -245,9 +245,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
               The following outlines the project description and understanding.
             </Text>
             <View style={styles.projectDetailsBox} wrap={true}>
-              {cleanText(state.projectDetails).split('\n').map((para, i) => (
-                <Text key={i} style={styles.text}>{para}</Text>
-              ))}
+              {renderCustomText(cleanText(state.projectDetails), styles)}
             </View>
           </View>
           {renderFooter()}

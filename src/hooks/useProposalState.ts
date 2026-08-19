@@ -354,6 +354,7 @@ export function useProposalState() {
     setState((prev) => {
       const next = { ...prev };
       if (data.clientName !== undefined) next.clientName = data.clientName;
+      if (data.projectDetails !== undefined) next.projectDetails = data.projectDetails;
       if (data.totalPrice !== undefined) next.totalPrice = data.totalPrice;
       if (data.pricingType !== undefined) next.pricingType = data.pricingType;
       if (data.hourlyRate !== undefined) next.hourlyRate = data.hourlyRate;

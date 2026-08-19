@@ -51,8 +51,8 @@ export function BudgetMilestones({
               type="button"
               onClick={() => updateField("pricingType", "fixed")}
               className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium transition ${!isHourly
-                  ? "bg-white text-blue-600 shadow-sm font-semibold"
-                  : "text-gray-600 hover:text-gray-900"
+                ? "bg-white text-blue-600 shadow-sm font-semibold"
+                : "text-gray-600 hover:text-gray-900"
                 }`}
             >
               <DollarSign size={15} />
@@ -62,8 +62,8 @@ export function BudgetMilestones({
               type="button"
               onClick={() => updateField("pricingType", "hourly")}
               className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md text-xs font-medium transition ${isHourly
-                  ? "bg-white text-blue-600 shadow-sm font-semibold"
-                  : "text-gray-600 hover:text-gray-900"
+                ? "bg-white text-blue-600 shadow-sm font-semibold"
+                : "text-gray-600 hover:text-gray-900"
                 }`}
             >
               <Clock size={15} />
@@ -202,8 +202,8 @@ export function BudgetMilestones({
                               updateMilestone(ms.id, "percentage", e.target.value)
                             }
                             className={`w-full pl-2 pr-5 py-1.5 text-xs border ${isOverBudget
-                                ? "border-red-500 focus:ring-red-500"
-                                : "border-gray-300 focus:ring-blue-500"
+                              ? "border-red-500 focus:ring-red-500"
+                              : "border-gray-300 focus:ring-blue-500"
                               } rounded-md focus:outline-none focus:ring-2 bg-white`}
                             placeholder="0"
                           />
@@ -238,10 +238,10 @@ export function BudgetMilestones({
                     <span>Total Allocated:</span>
                     <span
                       className={`font-semibold ${isOverBudget
-                          ? "text-red-600"
-                          : currentTotalPercent === 100
-                            ? "text-green-600"
-                            : "text-gray-700"
+                        ? "text-red-600"
+                        : currentTotalPercent === 100
+                          ? "text-green-600"
+                          : "text-gray-700"
                         }`}
                     >
                       {currentTotalPercent}%
