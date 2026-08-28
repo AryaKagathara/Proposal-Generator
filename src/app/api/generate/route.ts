@@ -77,7 +77,7 @@ Rules for generating the content:
    - The final handoff/deployment phase milestone must be 5%.
    - If Phase 1 is Strategy & Research (or similar setup/discovery phase), combine/consider it as part of the Advance milestone.
    - Distribute the remaining percentage logically among the intermediate phases/milestones. All milestone percentages must sum up to exactly 100%.
-6. CUSTOM SCOPE: List any additional notes, assumptions, or future scope details, and end with a comma-separated list of all deliverables.
+6. CUSTOM SCOPE: List any additional notes, assumptions, or future scope details, and list of all deliverables in bullet points.
 7. PORTFOLIO LINKS: Extract any portfolio names and links mentioned in the user's proposal or JD. If none are found, return an empty array.
 
 Return ONLY a valid JSON object matching this schema. Do not enclose it in markdown blocks except returning json format.
