@@ -468,6 +468,12 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
           </View>
         )}
 
+        <View style={{ marginTop: 10, marginBottom: 5 }}>
+          <Text style={[styles.text, { color: '#F35423', fontWeight: 'bold', fontSize: 9.5 }]}>
+            This quote is valid for 14 days only.
+          </Text>
+        </View>
+
         <Text style={[styles.subHeader]}>Payment Mode</Text>
         <View style={styles.section}>
           <Text style={styles.text}>Bank to Bank, Payoneer, Wise, Dribbble, Behance, Upwork</Text>

@@ -34,7 +34,7 @@ Your goal is to extract and generate structured proposal content to fit a specif
 Here is the JSON schema you must return:
 {
   "clientName": "Client Name or Company (or empty string if not found)",
-  "projectDetails": "The formatted Client Job Description. MUST preserve all original text, scope, links, and requirements verbatim without altering, omitting, summarizing, or modifying any content, but formatted with clean paragraphs and bullet points.",
+  "projectDetails": "The formatted Client Job Description. Keep the original requirements and details clear, but remove unnecessary or useless details that are irrelevant. Formatted with clean paragraphs and bullet points.",
   "totalPrice": "Estimated project budget/amount as a string (number only, e.g. '1200' or '3500'. If not specified in JD or proposal, estimate a reasonable price based on the work, or default to '1500')",
   "phases": [
     {
@@ -54,7 +54,7 @@ Here is the JSON schema you must return:
       "percentage": "Percentage as a string, e.g. '50' or '20' (must be a number only, without % symbol)"
     }
   ],
-  "customScopeContent": "Additional Notes or Future Scope Details. Followed by a 'Complete list of Deliverables List (Comma Separated)'.",
+  "customScopeContent": "Revision round policy (3 revision rounds for the scope of work), followed by the list of all deliverables line-by-line in a readable list, along with any additional notes or future scope details.",
   "portfolioLinks": [
     {
       "name": "Project/Work Title",
@@ -67,17 +67,22 @@ Here is the JSON schema you must return:
 Rules for generating the content:
 1. CLIENT NAME: Extract the client/company name from the JD or proposal. If not found, leave as empty string "".
 2. PROJECT REQUIREMENTS / DETAILS:
-   - Take the exact CLIENT JOB DESCRIPTION provided by the client and format it cleanly with proper spacing, readable paragraphs, and bullet points where appropriate (e.g. using '-' for bullet items).
-   - CRITICAL REQUIREMENT: Do NOT change, rewrite, summarize, or omit any content, wording, requirements, links, or specifications from the Client Job Description. Keep all original sentences and requirements intact and verbatim so that in the event of any client dispute, it serves as an authentic, exact record of what the client originally asked for.
+   - Keep the original project requirements and details clear, structured, and easy to read.
+   - Remove any unnecessary, useless, or irrelevant details/fluff that are not relevant to be part of the PROJECT REQUIREMENTS / DETAILS.
+   - Format cleanly with proper spacing, readable paragraphs, and bullet points where appropriate (e.g. using '-' for bullet items), while retaining all genuine scope, technical criteria, and reference links.
 3. PHASES: Create logical project phases based on the JD requirements. Each phase must have a title, timeline (e.g., '2 Weeks'), and deliverables. Each deliverable must have a title and a 1-sentence description.
 4. BUDGET: Extract the budget from the JD or proposal. Return only the numeric amount as a string (e.g. '1200').
 5. MILESTONES:
+   - Create multiple part-by-part milestones with a minimum of 3 to 4 milestones, ensuring work completed at each stage is covered for payment in case the project stops or fails.
    - If the totalPrice is under USD 1500, the Advance payment milestone must be 50%.
    - If the totalPrice is USD 1500 or more, the Advance payment milestone must be 20%.
    - The final handoff/deployment phase milestone must be 5%.
    - If Phase 1 is Strategy & Research (or similar setup/discovery phase), combine/consider it as part of the Advance milestone.
-   - Distribute the remaining percentage logically among the intermediate phases/milestones. All milestone percentages must sum up to exactly 100%.
-6. CUSTOM SCOPE: List any additional notes, assumptions, or future scope details, and list of all deliverables in bullet points.
+   - Distribute the remaining percentage logically across the intermediate milestones/phases so there are at least 3-4 distinct milestones total. All milestone percentages must sum up to exactly 100%.
+6. CUSTOM SCOPE:
+   - Explicitly include: 'There will be 3 revision rounds for the scope of work.'
+   - Mention all deliverables line-by-line in a clean list so it is easy to read.
+   - List any additional notes
 7. PORTFOLIO LINKS: Extract any portfolio names and links mentioned in the user's proposal or JD. If none are found, return an empty array.
 
 Return ONLY a valid JSON object matching this schema. Do not enclose it in markdown blocks except returning json format.
