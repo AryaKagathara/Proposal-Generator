@@ -1,6 +1,6 @@
 "use client";
 
-import { useProposalState, getCurrencySymbol } from "@/hooks/useProposalState";
+import { useProposalState, getCurrencySymbol, getTodayDateString } from "@/hooks/useProposalState";
 import { HeaderForm } from "./HeaderForm";
 import { ScopeBuilder } from "./ScopeBuilder";
 import { PricingPortfolio } from "./PricingPortfolio";
@@ -29,7 +29,7 @@ export function ProposalGenerator() {
   const documentFileName = useMemo(() => {
     const prefix = state.isPreliminaryQuote ? "Preliminary_Quotation" : "Final_Quotation";
     const client = state.clientName.replace(/\s+/g, '_') || 'Client';
-    const date = state.projectDate.replace(/\s+/g, '_') || 'Date';
+    const date = (state.projectDate || getTodayDateString()).replace(/\s+/g, '_');
     return `${prefix}_${client}_${date}.pdf`;
   }, [state.isPreliminaryQuote, state.clientName, state.projectDate]);
 

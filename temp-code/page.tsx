@@ -8,7 +8,7 @@ export default function Home() {
 
   // Settings & Model configuration
   const [showSettings, setShowSettings] = useState(false);
-  const [modelName, setModelName] = useState("gemini-3.6-flash");
+  const [modelName, setModelName] = useState("gemini-3.8-flash");
   const [useCustomModel, setUseCustomModel] = useState(false);
   const [customModelName, setCustomModelName] = useState("");
   const [temperature, setTemperature] = useState(1.0);

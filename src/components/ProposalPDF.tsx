@@ -21,10 +21,21 @@ Font.registerHyphenationCallback((word) => [word]);
 import { ProposalState, getCurrencySymbol } from '@/hooks/useProposalState';
 import { SERVICES_DATA } from '@/data/services';
 
-const formatProposalDate = (dateStr: string) => {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return dateStr;
+const formatProposalDate = (dateStr?: string | Date) => {
+  let date: Date;
+  if (!dateStr) {
+    date = new Date();
+  } else if (dateStr instanceof Date) {
+    date = dateStr;
+  } else {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      date = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    } else {
+      date = new Date(dateStr);
+    }
+  }
+  if (isNaN(date.getTime())) date = new Date();
 
   const day = date.getDate();
   const getOrdinalNum = (n: number) => {
@@ -199,7 +210,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
             <Text style={styles.coverDetail}>hello@comsci.tech | www.comsci.tech</Text>
           )}
 
-          <Text style={[styles.coverDetail, { marginTop: 15 }]}>{formatProposalDate(state.projectDate || new Date().toISOString().split('T')[0])}</Text>
+          <Text style={[styles.coverDetail, { marginTop: 15 }]}>{formatProposalDate(state.projectDate || new Date())}</Text>
           <Text style={[styles.coverDetail, { fontSize: 9, color: '#6B7280' }]}>This proposal is valid for 14 days only.</Text>
         </View>
       </Page>
@@ -698,17 +709,19 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
             <Text style={{ fontSize: 6, color: '#000000', marginBottom: 4 }}>
               {("SIGNED-0f434ae6eb545f612a672c945cf217c6eaebe00c1aa5e3ecf2e969df14f10429db953d0f8c2ab8d5b384edd2b71dc15f61fea0feb4d247184e86b752506fc6317c89d7b503ae1dc822d4ef2f1230df0e7c7effae26945ac88ff69d4cc9a3d05ac88ed54a6cc22647e0ea769c6d8574bcde745bf6c0afe6a006967d31f592ecdt".match(/.{1,60}/g) || []).join('\n')}
               {(() => {
-                const date = state.projectDate ? new Date(state.projectDate) : new Date();
                 const now = new Date();
+                let date = now;
                 if (state.projectDate) {
-                  date.setHours(now.getHours());
-                  date.setMinutes(now.getMinutes());
+                  const parts = state.projectDate.split('-');
+                  if (parts.length === 3) {
+                    date = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), now.getHours(), now.getMinutes());
+                  }
                 }
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const year = String(date.getFullYear());
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
                 return `${day}${month}${year}${hours}${minutes}`;
               })()}IST
             </Text>

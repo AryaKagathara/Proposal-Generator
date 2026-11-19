@@ -23,6 +23,14 @@ export const getCurrencySymbol = (currency: string, forPdf = false) => {
   }
 };
 
+export const getTodayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export type PortfolioLink = {
   id: string;
   name: string;
@@ -78,7 +86,7 @@ export type ProposalState = {
 const defaultState: ProposalState = {
   clientName: "",
   clientEmail: "",
-  projectDate: new Date().toISOString().split('T')[0],
+  projectDate: getTodayDateString(),
   agencyLogoOverride: "",
   projectDetails: "",
   selectedScope: [],
@@ -122,7 +130,11 @@ export function useProposalState() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        const mergedState: ProposalState = { ...defaultState, ...parsed };
+        const mergedState: ProposalState = {
+          ...defaultState,
+          ...parsed,
+          projectDate: getTodayDateString(),
+        };
         if (mergedState.portfolioLinks && mergedState.portfolioLinks.length > 0 && !mergedState.portfolioRawText) {
           mergedState.portfolioRawText = mergedState.portfolioLinks.map((link: any) => `${link.name}\n${link.url}`).join("\n\n");
         }
