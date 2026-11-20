@@ -8,7 +8,7 @@ export default function Home() {
 
   // Settings & Model configuration
   const [showSettings, setShowSettings] = useState(false);
-  const [modelName, setModelName] = useState("gemini-4-carbon");
+  const [modelName, setModelName] = useState("gemini-4-hydrogen");
   const [useCustomModel, setUseCustomModel] = useState(false);
   const [customModelName, setCustomModelName] = useState("");
   const [temperature, setTemperature] = useState(1.0);
@@ -202,6 +202,7 @@ export default function Home() {
                         }
                       }}
                     >
+                      <option value="gemini-4-hydrogen">Gemini 4 Hydrogen</option>
                       <option value="gemini-4-carbon">Gemini 4 Carbon</option>
                       <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
                       <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>

@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-4-carbon",
+      model: "gemini-4-hydrogen",
       generationConfig: {
         maxOutputTokens: 8192,
         responseMimeType: "application/json"
