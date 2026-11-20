@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       apiKey: userApiKey, 
       clientName, 
       clientLocation, 
-      modelName = "gemini-3.8-flash",
+      modelName = "gemini-4-carbon",
       temperature,
       topP,
       maxOutputTokens,
