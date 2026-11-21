@@ -8,12 +8,13 @@ export default function Home() {
 
   // Settings & Model configuration
   const [showSettings, setShowSettings] = useState(false);
-  const [modelName, setModelName] = useState("gemini-4-hydrogen");
+  const [modelName, setModelName] = useState("gemini-4-neon");
   const [useCustomModel, setUseCustomModel] = useState(false);
   const [customModelName, setCustomModelName] = useState("");
   const [temperature, setTemperature] = useState(1.0);
   const [topP, setTopP] = useState(0.95);
   const [maxOutputTokens, setMaxOutputTokens] = useState(2048);
+  const [thinkingLevel, setThinkingLevel] = useState("medium");
   const [extraContext, setExtraContext] = useState("");
 
   const [part1, setPart1] = useState("");
@@ -58,6 +59,7 @@ export default function Home() {
           temperature,
           topP,
           maxOutputTokens,
+          thinkingLevel,
           extraContext,
         }),
       });
@@ -202,6 +204,7 @@ export default function Home() {
                         }
                       }}
                     >
+                      <option value="gemini-4-neon">Gemini 4 Neon</option>
                       <option value="gemini-4-hydrogen">Gemini 4 Hydrogen</option>
                       <option value="gemini-4-carbon">Gemini 4 Carbon</option>
                       <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
@@ -272,6 +275,20 @@ export default function Home() {
                     value={maxOutputTokens}
                     onChange={(e) => setMaxOutputTokens(parseInt(e.target.value) || 8192)}
                   />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="thinking-level">Thinking Level</label>
+                  <select
+                    id="thinking-level"
+                    value={thinkingLevel}
+                    onChange={(e) => setThinkingLevel(e.target.value)}
+                  >
+                    <option value="minimal">Minimal</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
                 </div>
               </div>
             )}

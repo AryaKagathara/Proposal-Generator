@@ -6,16 +6,17 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { 
-      jobDescription, 
-      apiKey: userApiKey, 
-      clientName, 
-      clientLocation, 
-      modelName = "gemini-4-hydrogen",
+    const {
+      jobDescription,
+      apiKey: userApiKey,
+      clientName,
+      clientLocation,
+      modelName = "gemini-4-neon",
       temperature,
       topP,
       maxOutputTokens,
-      extraContext
+      extraContext,
+      thinkingLevel = "medium"
     } = body;
 
     if (!jobDescription) {
@@ -76,7 +77,11 @@ Job Description (JD) to process:
 ${jobDescription}
 `;
 
-    const config: any = {};
+    const config: any = {
+      thinkingConfig: {
+        thinkingLevel: thinkingLevel || "medium"
+      }
+    };
 
     if (temperature !== undefined) config.temperature = Number(temperature);
     if (topP !== undefined) config.topP = Number(topP);

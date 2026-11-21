@@ -18,13 +18,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-4-hydrogen",
+      model: "gemini-4-neon",
       generationConfig: {
         maxOutputTokens: 8192,
-        responseMimeType: "application/json"
-      }
+        responseMimeType: "application/json",
+        thinkingConfig: {
+          thinkingLevel: "medium"
+        }
+      } as any
     });
 
     const systemPrompt = `
