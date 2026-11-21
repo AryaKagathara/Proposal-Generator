@@ -481,7 +481,7 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
 
         <View style={{ marginTop: 10, marginBottom: 5 }}>
           <Text style={[styles.text, { color: '#F35423', fontWeight: 'bold', fontSize: 9.5 }]}>
-            This quote is valid for 14 days only.
+            This proposal is valid for 14 days only.
           </Text>
         </View>
 
@@ -495,35 +495,53 @@ export const ProposalDocument = ({ state, origin = '' }: { state: ProposalState,
       </Page>
 
       <Page size="A4" style={styles.page}>
-        {state.portfolioLinks.length > 0 && (
-          <>
-            <Text style={styles.header}>Portfolio References</Text>
-            <View style={[styles.table, { marginBottom: 20 }]}>
-              <View style={[styles.tableRow, styles.tableHeader]}>
-                <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Project Name</Text></View>
-                <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Reference Link</Text></View>
-              </View>
-              {state.portfolioLinks.map((link, idx) => {
-                const url = link.url ? link.url.trim() : '';
-                const validUrl = (!url || url.startsWith('http')) ? url : `https://${url}`;
-                return (
-                  <View key={idx} style={styles.tableRow} wrap={false}>
-                    <View style={styles.tableColHalf}><Text style={styles.tableCell}>{cleanText(link.name)}</Text></View>
-                    <View style={styles.tableColHalf}>
-                      {validUrl ? (
-                        <Link src={validUrl} style={styles.link}>{wrapUrl(cleanText(url))}</Link>
-                      ) : (
-                        <Text style={styles.tableCell}>{wrapUrl(cleanText(url)) || "-"}</Text>
-                      )}
-                    </View>
-                  </View>
-                );
-              })}
-            </View>
-          </>
-        )}
+        {(() => {
+          let links = [...state.portfolioLinks];
+          if (!state.hideContactDetails) {
+            const hasWebsite = links.some(
+              (l) => l.url && l.url.trim().toLowerCase().includes("comsci.tech")
+            );
+            if (!hasWebsite) {
+              links.push({
+                id: "default-comsci-website",
+                name: "Our Website",
+                url: "https://comsci.tech",
+              });
+            }
+          }
 
-        <Text style={state.portfolioLinks.length > 0 ? [styles.subHeader, { marginTop: 10 }] : styles.header}>Tools We Use</Text>
+          if (links.length === 0) return null;
+
+          return (
+            <>
+              <Text style={styles.header}>Portfolio References</Text>
+              <View style={[styles.table, { marginBottom: 20 }]}>
+                <View style={[styles.tableRow, styles.tableHeader]}>
+                  <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Project Name</Text></View>
+                  <View style={styles.tableColHalf}><Text style={styles.tableCellHeader}>Reference Link</Text></View>
+                </View>
+                {links.map((link, idx) => {
+                  const url = link.url ? link.url.trim() : '';
+                  const validUrl = (!url || url.startsWith('http')) ? url : `https://${url}`;
+                  return (
+                    <View key={idx} style={styles.tableRow} wrap={false}>
+                      <View style={styles.tableColHalf}><Text style={styles.tableCell}>{cleanText(link.name)}</Text></View>
+                      <View style={styles.tableColHalf}>
+                        {validUrl ? (
+                          <Link src={validUrl} style={styles.link}>{wrapUrl(cleanText(url))}</Link>
+                        ) : (
+                          <Text style={styles.tableCell}>{wrapUrl(cleanText(url)) || "-"}</Text>
+                        )}
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            </>
+          );
+        })()}
+
+        <Text style={styles.subHeader}>Tools We Use</Text>
         <View style={styles.table}>
           <View style={[styles.tableRow, styles.tableHeader]}>
             <View style={{ width: '30%', padding: 8, borderRightWidth: 1, borderRightColor: '#E5E7EB' }}>

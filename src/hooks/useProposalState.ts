@@ -156,6 +156,32 @@ export function useProposalState() {
   const updateField = <K extends keyof ProposalState>(key: K, value: ProposalState[K]) => {
     setState((prev) => {
       const nextState = { ...prev, [key]: value };
+
+      if (key === "hideContactDetails") {
+        const isHidden = Boolean(value);
+        if (!isHidden) {
+          // If Hide Contact Details is disabled (false), ensure Our Website link is present by default
+          const websiteUrl = "https://comsci.tech";
+          const websiteName = "Our Website";
+          const hasWebsite = (prev.portfolioLinks || []).some(
+            (link) => link.url && link.url.trim().toLowerCase().includes("comsci.tech")
+          );
+
+          if (!hasWebsite) {
+            const newLink: PortfolioLink = {
+              id: Math.random().toString(36).substr(2, 9),
+              name: websiteName,
+              url: websiteUrl,
+            };
+            nextState.portfolioLinks = [...(prev.portfolioLinks || []), newLink];
+            const raw = (prev.portfolioRawText || "").trim();
+            nextState.portfolioRawText = raw
+              ? `${raw}\n\n${websiteName}\n${websiteUrl}`
+              : `${websiteName}\n${websiteUrl}`;
+          }
+        }
+      }
+
       if (key === "portfolioRawText") {
         const text = value as string;
         const blocks = text.split(/\n\s*\n/);

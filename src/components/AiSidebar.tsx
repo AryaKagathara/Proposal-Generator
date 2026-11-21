@@ -10,6 +10,8 @@ interface AiSidebarProps {
 }
 
 export function AiSidebar({ isOpen, onClose, onApply }: AiSidebarProps) {
+  const [model, setModel] = useState("gemini-4-neon");
+  const [thinkingLevel, setThinkingLevel] = useState("medium");
   const [apiKey, setApiKey] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [userProposal, setUserProposal] = useState("");
@@ -17,15 +19,23 @@ export function AiSidebar({ isOpen, onClose, onApply }: AiSidebarProps) {
   const [error, setError] = useState<string | null>(null);
   const [generatedData, setGeneratedData] = useState<any>(null);
 
-  // Load API key from localStorage on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedKey = localStorage.getItem("gemini_api_key");
-      if (savedKey) {
-        setApiKey(savedKey);
+    // Load API key and preferences from localStorage on mount
+    useEffect(() => {
+      if (typeof window !== "undefined") {
+        const savedKey = localStorage.getItem("gemini_api_key");
+        if (savedKey) {
+          setApiKey(savedKey);
+        }
+        const savedModel = localStorage.getItem("gemini_model");
+        if (savedModel) {
+          setModel(savedModel);
+        }
+        const savedThinkingLevel = localStorage.getItem("gemini_thinking_level");
+        if (savedThinkingLevel) {
+          setThinkingLevel(savedThinkingLevel);
+        }
       }
-    }
-  }, []);
+    }, []);
 
   if (!isOpen) return null;
 
@@ -38,6 +48,10 @@ export function AiSidebar({ isOpen, onClose, onApply }: AiSidebarProps) {
     if (apiKey.trim()) {
       localStorage.setItem("gemini_api_key", apiKey.trim());
     }
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gemini_model", model);
+      localStorage.setItem("gemini_thinking_level", thinkingLevel);
+    }
 
     try {
       const response = await fetch("/api/generate", {
@@ -49,6 +63,8 @@ export function AiSidebar({ isOpen, onClose, onApply }: AiSidebarProps) {
           jobDescription,
           userProposal,
           apiKey: apiKey.trim() || undefined,
+          modelName: model,
+          thinkingLevel: thinkingLevel,
         }),
       });
 
@@ -102,6 +118,51 @@ export function AiSidebar({ isOpen, onClose, onApply }: AiSidebarProps) {
 
           {/* Body */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Model & Thinking Level selection side by side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Model
+                </label>
+                <select
+                  value={model}
+                  onChange={(e) => {
+                    setModel(e.target.value);
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("gemini_model", e.target.value);
+                    }
+                  }}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                >
+                  <option value="gemini-4-neon">Gemini 4 Neon</option>
+                  <option value="gemini-4-hydrogen">Gemini 4 Hydrogen</option>
+                  <option value="gemini-4-argon">Gemini 4 Argon</option>
+                  <option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                  Thinking Level
+                </label>
+                <select
+                  value={thinkingLevel}
+                  onChange={(e) => {
+                    setThinkingLevel(e.target.value);
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem("gemini_thinking_level", e.target.value);
+                    }
+                  }}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="xhigh">Extra High</option>
+                </select>
+              </div>
+            </div>
+
             {/* API Key */}
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider">

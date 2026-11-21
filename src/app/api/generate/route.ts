@@ -4,7 +4,13 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { jobDescription, userProposal, apiKey: userApiKey } = body;
+    const { 
+      jobDescription, 
+      userProposal, 
+      apiKey: userApiKey,
+      modelName = "gemini-4-neon",
+      thinkingLevel = "medium"
+    } = body;
 
     if (!jobDescription) {
       return NextResponse.json({ error: "Job description is required" }, { status: 400 });
@@ -18,15 +24,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-4-neon",
+      model: modelName,
       generationConfig: {
         maxOutputTokens: 8192,
         responseMimeType: "application/json",
         thinkingConfig: {
-          thinkingLevel: "medium"
+          thinkingLevel: thinkingLevel || "medium"
         }
       } as any
     });

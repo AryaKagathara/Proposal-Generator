@@ -64,8 +64,8 @@ export function ProposalGenerator() {
             <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
               Agency Proposal Generator
             </h1>
-            <p className="mt-2 text-sm text-gray-600">
-              Build custom proposals for Design & Development services instantly.
+            <p className="mt-2 text-sm text-gray-600 font-medium">
+              {process.env.NEXT_PUBLIC_APP_VERSION || "V 1.0"}
             </p>
           </div>
 
